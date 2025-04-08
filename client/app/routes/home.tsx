@@ -1,4 +1,4 @@
-import Gameboard from "~/components/template/Gameboard";
+import GameCanvas from "~/components/GameCanvas";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -9,5 +9,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-    return <Gameboard />;
+    return <GameCanvas />;
 }
