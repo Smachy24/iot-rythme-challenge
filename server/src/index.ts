@@ -76,6 +76,12 @@ xbeeParser.on("data", (frame) => {
     const digitalsSamples = frame.digitalSamples;
     if(digitalsSamples.DIO0 === 1) {
       sendToTopic(`game/${deviceId}`, "Bouton 0");
+      xbeeBuilder.write({
+        type: FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST,
+        destination64: frame.remote64,
+        command: AT_COMMAND.D2,
+        commandParameter: [0x00],
+      })
     }
 
     if(digitalsSamples.DIO1 === 1) {
