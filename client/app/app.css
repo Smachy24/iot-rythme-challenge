@@ -8,5 +8,6 @@
 
 html,
 body {
+    padding: 32px;
     background-color: #171320;
 }

@@ -4,4 +4,6 @@ export const COLORS = {
     blue: "#5fa9f5",
     yellow: "#f5d259",
     background: "#15111d",
+    borderColorPink: "#f761a9",
+    borderColorBlue: "#61f7e0",
 };

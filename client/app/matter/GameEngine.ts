@@ -21,6 +21,8 @@ export class GameEngine {
     constructor(
         container: HTMLElement,
         canvas: HTMLCanvasElement,
+        width: number = WORLD_WIDTH,
+        height: number = WORLD_HEIGHT,
         backgroundColor: string = COLORS.background
     ) {
         // The engine is used to create the physics world
@@ -33,8 +35,8 @@ export class GameEngine {
             engine: this.engine,
             canvas: canvas,
             options: {
-                width: WORLD_WIDTH,
-                height: WORLD_HEIGHT,
+                width: width,
+                height: height,
                 wireframes: false, // Enable wireframes for debugging
                 background: backgroundColor,
             },

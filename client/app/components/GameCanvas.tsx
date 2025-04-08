@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { GameEngine } from "../matter/GameEngine";
 
-export default function GameCanvas() {
+interface GameCanvasProps {
+    borderColor?: string;
+}
+
+export default function GameCanvas({ borderColor }: GameCanvasProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<GameEngine | null>(null);
@@ -25,7 +29,11 @@ export default function GameCanvas() {
     }, []);
 
     return (
-        <div ref={wrapperRef}>
+        <div
+            ref={wrapperRef}
+            className="border-2"
+            style={{ borderColor: borderColor }}
+        >
             <canvas ref={canvasRef} />
         </div>
     );

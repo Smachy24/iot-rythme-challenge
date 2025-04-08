@@ -1,5 +1,6 @@
 import GameCanvas from "~/components/GameCanvas";
 import type { Route } from "./+types/home";
+import GameBoard from "~/components/GameBoard";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -9,5 +10,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-    return <GameCanvas />;
+    return <GameBoard />;
 }
