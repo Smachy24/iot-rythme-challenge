@@ -1,39 +1,53 @@
+# XBee API Platform
 
-# Zigbee sample central 
+A TypeScript-based platform for controlling XBee modules using the Serial API mode 2.
 
-## Description
-This is a default code structure to start an IOT project with XBee modules.
+## Features
 
-You need to connect a XBee coordinator to this central and launch the service.
+- Serial communication using API mode 2
+- Environment variable configuration for serial port settings
 
-## Développeur
+## Prerequisites
 
-**Nom :** Sébastien FLEURY  
-**Email :** sebastien.fleury@digitalseeder.com  
-**Site Web :** https://digitalseeder.com
+- Node.js and npm installed
+- XBee module configured in API mode 2
 
-# Getting Started
+## Installation
 
-1. Copy .env.dist to .env file and edit with local parameters
+```bash
+npm install
+```
 
-        cp .env.dist .env
+## Configuration
 
-2. Install requirements
+Create a `.env` file in the root directory with the following variables:
 
-       make install
+```env
+SERIAL_PORT=/dev/tty.usbserial-XXXXX  # Your XBee serial port
+SERIAL_BAUDRATE=9600                   # XBee baud rate
+```
 
-3. Launch application
+## Usage
 
-       make run
+Start the application:
 
-## Requirements
-* Configure a coordinator and router/enddevice with XCTU ([Download XCTU](https://www.digi.com/products/embedded-systems/digi-xbee/digi-xbee-tools/xctu#productsupport-utilities))
-* Ensure to set API mode to same one in the code (default: 2)
-* Ensure your user is member of the `dialout` group on Linux (use the `id` command) and add user to group if not already done
+```bash
+npm start
+```
 
-      sudo usermod -a -G dialout <YOUR_USERNAME>
+Development mode with auto-reload:
 
-* Install command make 
-      
-      apt install make
+```bash
+npm run dev
+```
 
+## Dependencies
+
+- serialport: Serial communication
+- ts-xbee-api: XBee API frame parsing and building
+- dotenv: Environment configuration
+- socket.io: WebSocket communication (not used yet, prepared for future features)
+
+## License
+
+Private - All rights reserved
