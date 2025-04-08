@@ -7,6 +7,8 @@ import {
     ScrollRestoration,
 } from "react-router";
 
+import './communication/mqtt';
+
 import type { Route } from "./+types/root";
 import "./app.css";
 
