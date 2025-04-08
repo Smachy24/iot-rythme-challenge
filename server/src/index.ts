@@ -34,6 +34,8 @@ const serialPort = new SerialPort({
 serialPort.pipe(xbeeParser);
 xbeeBuilder.pipe(serialPort);
 
+import { sendToTopic, subscribeToTopic } from "./mqtt-client.ts";
+
 
 // Set up serial port event handlers
 serialPort.on("open", () => {
@@ -50,14 +52,37 @@ serialPort.on("close", () => {
 
 // Set up XBee API event handlers
 xbeeParser.on("data", (frame) => {
+  if(frame.type === FRAME_TYPE.JOIN_NOTIFICATION_STATUS) {
+    console.log("Join notification status");
+  }
+  if(frame.type === FRAME_TYPE.REGISTER_JOINING_DEVICE_STATUS) {
+    console.log("Register joining device status");
+  }
+  if(frame.type === FRAME_TYPE.REGISTER_JOINING_DEVICE) {
+    console.log("Register joining device");
+  }
   if (frame.type === FRAME_TYPE.NODE_IDENTIFICATION) {
     const deviceId = frame.sender64.toString('hex');
+      console.log(deviceId);
     if (!connectedDevices.has(deviceId)) {
       connectedDevices.add(deviceId);
       console.log(`Device ${deviceId} joined the network`);
-      console.log(`Total connected devices: ${connectedDevices.size}`);
+      subscribeToTopic(`game/${deviceId}`)
+    }
+  }
+  if(frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
+    console.log(frame)
+    const deviceId = frame.remote64.toString('hex');
+    const digitalsSamples = frame.digitalSamples;
+    if(digitalsSamples.DIO0 === 1) {
+      sendToTopic(`game/${deviceId}`, "Bouton 0");
+    }
+
+    if(digitalsSamples.DIO1 === 1) {
+      sendToTopic(`game/${deviceId}`, "Bouton 1");
     }
   }
 
-  console.log("Received frame:", frame);
+  console.log(connectedDevices);
 });
+
