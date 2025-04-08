@@ -34,7 +34,7 @@ const serialPort = new SerialPort({
 serialPort.pipe(xbeeParser);
 xbeeBuilder.pipe(serialPort);
 
-import client, { subscribeToTopic } from "./mqtt-client.ts";
+import { sendToTopic, subscribeToTopic } from "./mqtt-client.ts";
 
 
 // Set up serial port event handlers
@@ -71,8 +71,18 @@ xbeeParser.on("data", (frame) => {
     }
   }
   if(frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
-    console.log("Bouton");
+    console.log(frame)
+    const deviceId = frame.remote64.toString('hex');
+    const digitalsSamples = frame.digitalSamples;
+    if(digitalsSamples.DIO0 === 1) {
+      sendToTopic(`game/${deviceId}`, "Bouton 0");
+    }
+
+    if(digitalsSamples.DIO1 === 1) {
+      sendToTopic(`game/${deviceId}`, "Bouton 1");
+    }
   }
 
   console.log(connectedDevices);
 });
+
