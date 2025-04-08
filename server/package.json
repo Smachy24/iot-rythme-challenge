@@ -1,0 +1,20 @@
+{
+  "name": "zigbee-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node src/server"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "firebase-admin": "^9.5.0",
+    "serialport": "^9.2.4",
+    "socket.io": "^2.4.0",
+    "xbee": "^0.0.4",
+    "xbee-api": "^0.6.0",
+    "yarn": "^1.22.22"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
