@@ -1,5 +1,5 @@
 import { SerialPort } from "serialport";
-import { XBeeParser, XBeeBuilder, type BuildableFrame } from 'ts-xbee-api';
+import { XBeeParser, XBeeBuilder } from 'ts-xbee-api';
 import { FRAME_TYPE, AT_COMMAND } from 'ts-xbee-api/src/lib/constants.js';
 import dotenv from 'dotenv';
 import client, { sendToTopic, subscribeToTopic } from "./mqtt-client.ts";
@@ -14,9 +14,7 @@ if (!process.env.SERIAL_PORT)
 if (!process.env.SERIAL_BAUDRATE)
     throw new Error('Missing SERIAL_BAUDRATE environment variable');
 
-
-
-
+const TIMEOUT_MS = 6000;
 
 // Initialize XBee API with API mode 2
 const xbeeParser = new XBeeParser({
@@ -52,12 +50,10 @@ function updateLight(atCommand: AT_COMMAND, on: boolean, destination64: string, 
   });
 }
 
-
-function getPlayerByUsername(username: string): PlayerModel | undefined {
-  return Array.from(connectedDevices.values()).find(
-    (player) => player.username === username
-  );
+export function sendGamePlayersToTopic() {
+  sendToTopic('game/players', `[${connectedDevices.keys().toArray().toString()}]`);
 }
+
 
 // Set up serial port event handlers
 serialPort.on("open", () => {
@@ -74,11 +70,11 @@ serialPort.on("close", () => {
 
 
 client.on("message", (topic, message) => {
-  const [ game, username, subTopic ] = topic.split("/");
+  const [ game, deviceId, subTopic ] = topic.split("/");
 
-  if(subTopic === "light" && username) {
+  if(subTopic === "light" && deviceId) {
     console.log(message.toString());
-    const player = getPlayerByUsername(username);
+    const player = connectedDevices.get(deviceId);
     if(player) {
       const lightArray: [boolean, boolean, boolean, boolean] = JSON.parse(message.toString());
       const lightIndex: number = lightArray.findIndex(value => value)
@@ -105,12 +101,11 @@ xbeeParser.on("data", (frame) => {
     const nodeIdentifier = frame.nodeIdentifier;
 
     if (!connectedDevices.has(deviceId)) {
-      const username = "player" + (connectedDevices.size + 1);
-      const player = new PlayerModel(username, deviceId, frame.sender16.toString('hex'), nodeIdentifier)
+      const player = new PlayerModel(deviceId, frame.sender16.toString('hex'), nodeIdentifier)
       connectedDevices.set(deviceId, player);
-      console.log(`Device ${deviceId} joined the network`);
-      subscribeToTopic(`game/${username}/light`)
-      subscribeToTopic(`game/${username}/controller`)
+      subscribeToTopic(`game/${deviceId}/light`)
+      subscribeToTopic(`game/${deviceId}/controller`)
+      sendGamePlayersToTopic()
     }
     console.log(connectedDevices);
   }
@@ -118,24 +113,34 @@ xbeeParser.on("data", (frame) => {
   if(frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
     const deviceId = frame.remote64.toString('hex');
     const digitalsSamples = frame.digitalSamples;
+
+
     const player = connectedDevices.get(deviceId);
     if(player){
+      player.lastRequestDate = Date.now();
       if(digitalsSamples.DIO0 === 1) {
-        sendToTopic(`game/${player.username}/controller`, [true, false, false, false].toString());
+        sendToTopic(`game/${player.destinationController64}/controller`, [true, false, false, false].toString());
       }
       if(digitalsSamples.DIO1 === 1) {
-        sendToTopic(`game/${player.username}/controller`, [false, true, false, false].toString());
+        sendToTopic(`game/${player.destinationController64}/controller`, [false, true, false, false].toString());
       }
       if(digitalsSamples.DIO2 === 1) {
-        sendToTopic(`game/${player.username}/controller`, [false, false, true, false].toString());
+        sendToTopic(`game/${player.destinationController64}/controller`, [false, false, true, false].toString());
       }
       if(digitalsSamples.DIO3 === 1) {
-        sendToTopic(`game/${player.username}/controller`, [false, false, false, true].toString());
+        sendToTopic(`game/${player.destinationController64}/controller`, [false, false, false, true].toString());
       }
     }
-
   }
-
-
 });
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [deviceId, player] of connectedDevices.entries()) {
+    if (now - player.lastRequestDate > TIMEOUT_MS) {
+      connectedDevices.delete(deviceId);
+      sendGamePlayersToTopic()
+    }
+  }
+}, TIMEOUT_MS);
 

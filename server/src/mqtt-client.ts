@@ -1,9 +1,11 @@
 import mqtt from "mqtt";
+import { sendGamePlayersToTopic } from "./index.ts";
 
 const client = mqtt.connect("mqtt://test.mosquitto.org");
 
 client.on("connect", () => {
   console.log("Connected to MQTT broker");
+  sendGamePlayersToTopic();
 });
 
 export function subscribeToTopic(topic: string) {
