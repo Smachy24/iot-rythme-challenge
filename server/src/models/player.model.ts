@@ -5,7 +5,6 @@ export class PlayerModel {
   private _destinationController64: string;
   private _destinationController16: string;
   private _controllerNodeIdentifier: string
-  private _buttons: AT_COMMAND[];
   private _lights: AT_COMMAND[];
 
   constructor(username: string, destinationController64: string, destinationController16: string, controllerNodeIdentifier: string) {
@@ -13,7 +12,6 @@ export class PlayerModel {
     this._destinationController64 = destinationController64;
     this._destinationController16 = destinationController16;
     this._controllerNodeIdentifier = controllerNodeIdentifier;
-    this._buttons = [AT_COMMAND.D0, AT_COMMAND.D1, AT_COMMAND.D2, AT_COMMAND.D3];
     this._lights = [AT_COMMAND.D4, AT_COMMAND.D5, AT_COMMAND.D6, AT_COMMAND.D7];
   }
 
@@ -48,14 +46,6 @@ export class PlayerModel {
 
   set controllerNodeIdentifier(value: string) {
     this._controllerNodeIdentifier = value;
-  }
-
-  get buttons(): AT_COMMAND[] {
-    return this._buttons;
-  }
-
-  set buttons(value: AT_COMMAND[]) {
-    this._buttons = value;
   }
 
   get lights(): AT_COMMAND[] {
