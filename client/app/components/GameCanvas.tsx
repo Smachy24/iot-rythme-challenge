@@ -8,6 +8,7 @@ interface GameCanvasProps {
     borderColor?: string;
     selectedTrack: MusicTrack;
     shouldStart: boolean;
+    onFinalScore?: (score: number) => void;
 }
 
 export default function GameCanvas({
@@ -15,6 +16,7 @@ export default function GameCanvas({
     borderColor,
     selectedTrack,
     shouldStart,
+    onFinalScore,
 }: GameCanvasProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,7 +32,12 @@ export default function GameCanvas({
     };
 
     useEffect(() => {
-        if (!shouldStart) return;
+        if (!shouldStart) {
+            if (engineRef.current) {
+                onFinalScore?.(score);
+            }
+            return;
+        }
         if (!canvasRef.current || !wrapperRef.current) return;
 
         const noteSound = new Audio("/public/assets/sounds/drum_kick.wav");
