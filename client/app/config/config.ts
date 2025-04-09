@@ -3,10 +3,10 @@ enum ENV {
   PORT = "VITE_WSS_PORT",
   PATH = "VITE_WSS_PATH",
   GAME_TOPIC = "VITE_WSS_GAME_TOPC",
-  CONTROLLER_1 = "VITE_WSS_GAME_CONTROLLER_1",
-  CONTROLLER_2 = "VITE_WSS_GAME_CONTROLLER_2",
-  LIGHT_1 = "VITE_WSS_GAME_LIGHT_1",
-  LIGHT_2 = "VITE_WSS_GAME_LIGHT_2",
+  PLAYER_1 = "VITE_WSS_GAME_PLAYER_1",
+  PLAYER_2 = "VITE_WSS_GAME_PLAYER_2",
+  LIGHT = "VITE_WSS_GAME_LIGHT",
+  CONTROLLER = "VITE_WSS_GAME_CONTROLLER",
 }
 
 function checkAndGetEnv(key: string): string {
@@ -19,7 +19,7 @@ export const url = checkAndGetEnv(ENV.URL);
 export const port = parseInt(checkAndGetEnv(ENV.PORT));
 export const path = checkAndGetEnv(ENV.PATH);
 export const gameTopic = checkAndGetEnv(ENV.GAME_TOPIC);
-export const controller1 = checkAndGetEnv(ENV.CONTROLLER_1);
-export const controller2 = checkAndGetEnv(ENV.CONTROLLER_2);
-export const light1 = checkAndGetEnv(ENV.LIGHT_1);
-export const light2 = checkAndGetEnv(ENV.LIGHT_1);
+export const player1 = checkAndGetEnv(ENV.PLAYER_1);
+export const player2 = checkAndGetEnv(ENV.PLAYER_2);
+export const light = checkAndGetEnv(ENV.LIGHT);
+export const controller = checkAndGetEnv(ENV.CONTROLLER);
