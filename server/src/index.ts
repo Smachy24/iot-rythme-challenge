@@ -1,5 +1,5 @@
 import { SerialPort } from "serialport";
-import { XBeeParser, XBeeBuilder, type BuildableFrame } from 'ts-xbee-api';
+import { XBeeParser, XBeeBuilder } from 'ts-xbee-api';
 import { FRAME_TYPE, AT_COMMAND } from 'ts-xbee-api/src/lib/constants.js';
 import dotenv from 'dotenv';
 import client, { sendToTopic, subscribeToTopic } from "./mqtt-client.ts";
@@ -48,6 +48,10 @@ function updateLight(atCommand: AT_COMMAND, on: boolean, destination64: string, 
     command: atCommand,
     commandParameter: [on ? 0x05 : 0x00],
   });
+}
+
+export function sendGamePlayersToTopic() {
+  sendToTopic('game/players', `[${connectedDevices.keys().toArray().toString()}]`);
 }
 
 
@@ -101,7 +105,7 @@ xbeeParser.on("data", (frame) => {
       connectedDevices.set(deviceId, player);
       subscribeToTopic(`game/${deviceId}/light`)
       subscribeToTopic(`game/${deviceId}/controller`)
-      sendToTopic('game/players', connectedDevices.keys().toArray().toString());
+      sendGamePlayersToTopic()
     }
     console.log(connectedDevices);
   }
@@ -135,7 +139,7 @@ setInterval(() => {
   for (const [deviceId, player] of connectedDevices.entries()) {
     if (now - player.lastRequestDate > TIMEOUT_MS) {
       connectedDevices.delete(deviceId);
-      sendToTopic(`game/${player.destinationController64}/controller`, "true");
+      sendGamePlayersToTopic()
     }
   }
 }, TIMEOUT_MS);
