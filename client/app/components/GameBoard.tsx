@@ -16,7 +16,7 @@ export default function GameBoard() {
             2: 0,
         }
     );
-
+    const [gameInstanceId, setGameInstanceId] = useState(0);
     const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
     const startGame = () => {
@@ -52,6 +52,15 @@ export default function GameBoard() {
             ...prev,
             [playerId]: score,
         }));
+    };
+
+    const resetGame = () => {
+        setGameStarted(false);
+        setShouldStart(false);
+        setGameOver(false);
+        setCountdown(null);
+        setPlayerScores({ 1: 0, 2: 0 });
+        setGameInstanceId((id) => id + 1);
     };
 
     useEffect(() => {
@@ -112,11 +121,18 @@ export default function GameBoard() {
                             ? "Player 2 wins!"
                             : "Draw!"}
                     </h2>
+                    <button
+                        className="mt-4 px-4 py-2 bg-pink-500 text-white rounded"
+                        onClick={resetGame}
+                    >
+                        Play Again
+                    </button>
                 </div>
             )}
 
             <div className="flex gap-32">
                 <GameCanvas
+                    key={`player-1-${gameInstanceId}`}
                     playerId={PLAYERS.ONE}
                     borderColor={COLORS.borderColorPink}
                     selectedTrack={selectedTrack}
@@ -124,6 +140,7 @@ export default function GameBoard() {
                     onFinalScore={handleFinalScore(PLAYERS.ONE)}
                 />
                 <GameCanvas
+                    key={`player-2-${gameInstanceId}`}
                     playerId={PLAYERS.TWO}
                     borderColor={COLORS.borderColorBlue}
                     selectedTrack={selectedTrack}
