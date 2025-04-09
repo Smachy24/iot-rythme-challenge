@@ -53,6 +53,11 @@ function updateLight(atCommand: AT_COMMAND, on: boolean, destination64: string, 
 }
 
 
+function getPlayerByUsername(username: string): PlayerModel | undefined {
+  return Array.from(connectedDevices.values()).find(
+    (player) => player.username === username
+  );
+}
 
 // Set up serial port event handlers
 serialPort.on("open", () => {
@@ -73,9 +78,7 @@ client.on("message", (topic, message) => {
 
   if(subTopic === "light" && username) {
     console.log(message.toString());
-    const player = Array.from(connectedDevices.values()).find(
-      (player) => player.username === username
-    );
+    const player = getPlayerByUsername(username);
     if(player) {
       const lightArray: [boolean, boolean, boolean, boolean] = JSON.parse(message.toString());
       const lightIndex: number = lightArray.findIndex(value => value)
@@ -107,21 +110,30 @@ xbeeParser.on("data", (frame) => {
       connectedDevices.set(deviceId, player);
       console.log(`Device ${deviceId} joined the network`);
       subscribeToTopic(`game/${username}/light`)
+      subscribeToTopic(`game/${username}/controller`)
     }
     console.log(connectedDevices);
   }
 
   if(frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
-    console.log(frame)
     const deviceId = frame.remote64.toString('hex');
     const digitalsSamples = frame.digitalSamples;
-    if(digitalsSamples.DIO0 === 1) {
-      sendToTopic(`game/${deviceId}`, "Bouton 0");
+    const player = connectedDevices.get(deviceId);
+    if(player){
+      if(digitalsSamples.DIO0 === 1) {
+        sendToTopic(`game/${player.username}/controller`, [true, false, false, false].toString());
+      }
+      if(digitalsSamples.DIO1 === 1) {
+        sendToTopic(`game/${player.username}/controller`, [false, true, false, false].toString());
+      }
+      if(digitalsSamples.DIO2 === 1) {
+        sendToTopic(`game/${player.username}/controller`, [false, false, true, false].toString());
+      }
+      if(digitalsSamples.DIO3 === 1) {
+        sendToTopic(`game/${player.username}/controller`, [false, false, false, true].toString());
+      }
     }
 
-    if(digitalsSamples.DIO1 === 1) {
-      sendToTopic(`game/${deviceId}`, "Bouton 1");
-    }
   }
 
 
