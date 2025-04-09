@@ -9,6 +9,7 @@ export default function GameBoard() {
     const [gameStarted, setGameStarted] = useState(false);
     const [countdown, setCountdown] = useState<number | null>(null);
     const [shouldStart, setShouldStart] = useState(false);
+    const [gameOver, setGameOver] = useState(false);
 
     const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
@@ -29,6 +30,11 @@ export default function GameBoard() {
                 music.play();
                 setShouldStart(true);
                 setGameStarted(true);
+
+                music.onended = () => {
+                    setShouldStart(false);
+                    setGameOver(true);
+                };
             } else {
                 setCountdown(count);
             }
@@ -77,6 +83,12 @@ export default function GameBoard() {
             {countdown !== null && (
                 <div className="text-4xl font-bold text-white animate-pulse">
                     {countdown === 1 ? "GO!" : countdown}
+                </div>
+            )}
+
+            {gameOver && (
+                <div className="text-3xl text-white font-bold mt-4">
+                    Game Over!
                 </div>
             )}
 
