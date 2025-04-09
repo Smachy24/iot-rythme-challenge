@@ -18,18 +18,23 @@ export default function GameCanvas({ borderColor }: GameCanvasProps) {
         setScoreLabel(label);
     };
 
+    const bpm = 95;
+    const beatInterval = 60000 / bpm; // in milliseconds
+
     useEffect(() => {
         if (!canvasRef.current || !wrapperRef.current) return;
 
+        const noteSound = new Audio("/assets/sounds/drum_kick.wav");
         engineRef.current = new GameEngine(
             wrapperRef.current,
             canvasRef.current,
+            noteSound,
             onScoreChange
         );
 
         const interval = setInterval(() => {
             engineRef.current?.spawnMusicNote();
-        }, Math.random() * 1000 + 500);
+        }, beatInterval);
 
         return () => {
             clearInterval(interval);

@@ -1,14 +1,14 @@
-import GameCanvas from "~/components/GameCanvas";
-import type { Route } from "./+types/home";
-import GameBoard from "~/components/GameBoard";
-
-export function meta({}: Route.MetaArgs) {
-    return [
-        { title: "New React Router App" },
-        { name: "description", content: "Welcome to React Router!" },
-    ];
-}
+import { NavLink } from "react-router";
 
 export default function Home() {
-    return <GameBoard />;
+    return (
+        <div>
+            <h1 className="text-4xl">Rythme Challenge</h1>
+            <NavLink to="/game">
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Start Game
+                </button>
+            </NavLink>
+        </div>
+    );
 }

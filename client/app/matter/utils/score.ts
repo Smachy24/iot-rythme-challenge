@@ -1,6 +1,12 @@
 import { COLORS } from "~/theme/colors";
 
-export type ScoreLabel = "perfect" | "good" | "ok" | "miss";
+export type ScoreLabel =
+    | "perfect"
+    | "good"
+    | "ok"
+    | "miss"
+    | "wrong_note"
+    | "too_early";
 
 interface ScoreLabelAndPoint {
     score: number;
@@ -20,9 +26,17 @@ export const SCORE_MAPPING: Record<string, ScoreLabelAndPoint> = {
         score: 25,
         label: "ok",
     },
-    miss: {
+    too_early: {
         score: -25,
+        label: "too_early",
+    },
+    miss: {
+        score: -50,
         label: "miss",
+    },
+    wrong_note: {
+        score: -100,
+        label: "wrong_note",
     },
 };
 
@@ -31,6 +45,8 @@ export const SCORE_COLOR_MAPPING: Record<ScoreLabel, string> = {
     good: COLORS.yellow,
     ok: COLORS.blue,
     miss: COLORS.red,
+    wrong_note: COLORS.red,
+    too_early: COLORS.red,
 };
 
 export function getScore(

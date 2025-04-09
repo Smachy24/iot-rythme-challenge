@@ -8,6 +8,7 @@ import {
     COL_GAP,
     NUMBER_OF_COL,
     MUSIC_NOTE_LABEL,
+    GOOD_TIMING_BOX_LABEL,
 } from "../constants/gameConfig";
 import { getScore, SCORE_MAPPING, type ScoreLabel } from "./utils/score";
 
@@ -20,13 +21,14 @@ export class GameEngine {
     // Pressed music note are the music note that are currently colliding with the floor and have been pressed
     private pressedMusicNotesCollidingWithTimingBox: Set<Matter.Body> =
         new Set();
+    private noteSound: HTMLAudioElement;
     private goodTimingBoxPosition: Matter.Vector;
     private maxValidYPosition: number;
     private onScoreChange?: (score: number, label: ScoreLabel) => void;
-
     constructor(
         container: HTMLElement,
         canvas: HTMLCanvasElement,
+        noteSound: HTMLAudioElement,
         onScoreChange?: (score: number, label: ScoreLabel) => void,
         width: number = WORLD_WIDTH,
         height: number = WORLD_HEIGHT,
@@ -45,13 +47,11 @@ export class GameEngine {
                 width: width,
                 height: height,
                 wireframes: false, // Enable wireframes for debugging
-                background: backgroundColor,
                 showAngleIndicator: true,
-                // showCollisions: true,
-                // showConvexHulls: true,
-                // showBroadphase: true,
+                background: backgroundColor,
             },
         });
+        this.noteSound = noteSound;
         this.goodTimingBoxPosition = { x: 0, y: 0 };
         this.maxValidYPosition = COL_GAP;
         this.onScoreChange = onScoreChange;
@@ -94,8 +94,10 @@ export class GameEngine {
             event.pairs.forEach(({ bodyA, bodyB }) => {
                 // We just have to check if the bodyA or bodyB is the ball because the ball is the only element that can collide with the floor
                 if (
-                    bodyA.label === MUSIC_NOTE_LABEL ||
-                    bodyB.label === MUSIC_NOTE_LABEL
+                    (bodyA.label === MUSIC_NOTE_LABEL &&
+                        bodyB.label === GOOD_TIMING_BOX_LABEL) ||
+                    (bodyB.label === MUSIC_NOTE_LABEL &&
+                        bodyA.label === GOOD_TIMING_BOX_LABEL)
                 ) {
                     const ball =
                         bodyA.label === MUSIC_NOTE_LABEL ? bodyA : bodyB;
@@ -128,23 +130,32 @@ export class GameEngine {
     }
 
     private handleKeyDown = (event: KeyboardEvent) => {
-        this.musicNotesCollidingWithTimingBox.forEach((ball) => {
-            if (event.key === ball.plugin.inputValue) {
-                this.pressedMusicNotesCollidingWithTimingBox.add(ball);
-                const yPositionFromGoodLimit =
-                    this.getYDistanceBetweenTwoBodiesPosition(
-                        ball.position,
-                        this.goodTimingBoxPosition
+        if (this.musicNotesCollidingWithTimingBox.size === 0) {
+            const { score, label } = SCORE_MAPPING.too_early;
+            this.updateScore(score, label);
+        } else {
+            this.musicNotesCollidingWithTimingBox.forEach((ball) => {
+                if (event.key === ball.plugin.inputValue) {
+                    this.pressedMusicNotesCollidingWithTimingBox.add(ball);
+                    const yPositionFromGoodLimit =
+                        this.getYDistanceBetweenTwoBodiesPosition(
+                            ball.position,
+                            this.goodTimingBoxPosition
+                        );
+                    const { score, label } = getScore(
+                        yPositionFromGoodLimit,
+                        this.maxValidYPosition
                     );
-                const { score, label } = getScore(
-                    yPositionFromGoodLimit,
-                    this.maxValidYPosition
-                );
-                this.updateScore(score, label);
-                console.log(label);
-                Matter.World.remove(this.engine.world, ball);
-            }
-        });
+                    this.updateScore(score, label);
+                    this.noteSound.play();
+                    console.log(label);
+                    Matter.World.remove(this.engine.world, ball);
+                } else {
+                    const { score, label } = SCORE_MAPPING.wrong_note;
+                    this.updateScore(score, label);
+                }
+            });
+        }
     };
 
     private updateScore(score: number, label: ScoreLabel) {
