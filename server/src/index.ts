@@ -2,6 +2,9 @@ import { SerialPort } from "serialport";
 import { XBeeParser, XBeeBuilder, type BuildableFrame } from 'ts-xbee-api';
 import { FRAME_TYPE, AT_COMMAND } from 'ts-xbee-api/src/lib/constants.js';
 import dotenv from 'dotenv';
+import client, { sendToTopic, subscribeToTopic } from "./mqtt-client.ts";
+import { PlayerModel } from "./models/player.model.ts";
+
 
 dotenv.config();
 
@@ -10,6 +13,10 @@ if (!process.env.SERIAL_PORT)
 
 if (!process.env.SERIAL_BAUDRATE)
     throw new Error('Missing SERIAL_BAUDRATE environment variable');
+
+
+
+
 
 // Initialize XBee API with API mode 2
 const xbeeParser = new XBeeParser({
@@ -22,7 +29,7 @@ const xbeeBuilder = new XBeeBuilder({
 
 
 // Track connected devices
-const connectedDevices = new Set<string>();
+const connectedDevices = new Map<string, PlayerModel>();
 
 // Create serial port
 const serialPort = new SerialPort({
@@ -34,7 +41,17 @@ const serialPort = new SerialPort({
 serialPort.pipe(xbeeParser);
 xbeeBuilder.pipe(serialPort);
 
-import { sendToTopic, subscribeToTopic } from "./mqtt-client.ts";
+
+function updateLight(atCommand: AT_COMMAND, on: boolean, destination64: string, destination16: string) {
+  xbeeBuilder.write({
+    type: FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST,
+    destination64: destination64,
+    destination16: destination16,
+    command: atCommand,
+    commandParameter: [on ? 0x05 : 0x00],
+  });
+}
+
 
 
 // Set up serial port event handlers
@@ -50,6 +67,25 @@ serialPort.on("close", () => {
   console.log("Serial port closed");
 });
 
+
+client.on("message", (topic, message) => {
+  const [ game, username, subTopic ] = topic.split("/");
+
+  if(subTopic === "light" && username) {
+    console.log(message.toString());
+    const player = Array.from(connectedDevices.values()).find(
+      (player) => player.username === username
+    );
+    if(player) {
+      const lightArray: [boolean, boolean, boolean, boolean] = JSON.parse(message.toString());
+      const lightIndex: number = lightArray.findIndex(value => value)
+      const atCommand = player.lights[lightIndex] as AT_COMMAND;
+      updateLight(atCommand, true, player.destinationController64, player.destinationController16);
+    }
+
+  }
+});
+
 // Set up XBee API event handlers
 xbeeParser.on("data", (frame) => {
   if(frame.type === FRAME_TYPE.JOIN_NOTIFICATION_STATUS) {
@@ -62,27 +98,25 @@ xbeeParser.on("data", (frame) => {
     console.log("Register joining device");
   }
   if (frame.type === FRAME_TYPE.NODE_IDENTIFICATION) {
-    const deviceId = frame.sender64.toString('hex');
-      console.log(deviceId);
+    const deviceId: string = frame.sender64.toString('hex');
+    const nodeIdentifier = frame.nodeIdentifier;
+
     if (!connectedDevices.has(deviceId)) {
-      connectedDevices.add(deviceId);
+      const username = "player" + (connectedDevices.size + 1);
+      const player = new PlayerModel(username, deviceId, frame.sender16.toString('hex'), nodeIdentifier)
+      connectedDevices.set(deviceId, player);
       console.log(`Device ${deviceId} joined the network`);
-      subscribeToTopic(`game/${deviceId}`)
+      subscribeToTopic(`game/${username}/light`)
     }
+    console.log(connectedDevices);
   }
+
   if(frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
     console.log(frame)
     const deviceId = frame.remote64.toString('hex');
     const digitalsSamples = frame.digitalSamples;
     if(digitalsSamples.DIO0 === 1) {
       sendToTopic(`game/${deviceId}`, "Bouton 0");
-      xbeeBuilder.write({
-        type: FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST,
-        destination64: frame.remote64,
-        destination16: frame.remote16,
-        command: AT_COMMAND.D2,
-        commandParameter: [0x05],
-      })
     }
 
     if(digitalsSamples.DIO1 === 1) {
@@ -90,6 +124,6 @@ xbeeParser.on("data", (frame) => {
     }
   }
 
-  console.log(connectedDevices);
+
 });
 

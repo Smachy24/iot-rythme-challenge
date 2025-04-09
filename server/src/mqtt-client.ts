@@ -6,11 +6,6 @@ client.on("connect", () => {
   console.log("Connected to MQTT broker");
 });
 
-client.on("message", (topic, message) => {
-  console.log(`Received message on topic ${topic}:`);
-  console.log(message.toString());
-});
-
 export function subscribeToTopic(topic: string) {
   client.subscribe(topic, (err) => {
     if (err) {
@@ -18,7 +13,6 @@ export function subscribeToTopic(topic: string) {
     }
     else {
       console.log(`Subscribed to topic ${topic}`);
-      sendToTopic(topic, "Hello from MQTT client");
     }
   });
 }
