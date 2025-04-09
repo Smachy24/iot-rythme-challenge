@@ -80,8 +80,8 @@ xbeeParser.on("data", (frame) => {
         type: FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST,
         destination64: frame.remote64,
         destination16: frame.remote16,
-        command: "D2",
-        commandParameter: [0x00],
+        command: AT_COMMAND.D2,
+        commandParameter: [0x05],
       })
     }
 
