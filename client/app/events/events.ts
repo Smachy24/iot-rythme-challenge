@@ -1,4 +1,4 @@
-import { EventEmitter } from "stream";
+import EventEmitter from "eventemitter3";
 
 const events = new EventEmitter();
 
