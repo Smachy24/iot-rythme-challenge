@@ -1,6 +1,7 @@
 import mqtt from "mqtt";
 import { useEffect, useState } from "react";
 import { controller, gameTopic, light, path, player1, player2, port, url } from "~/config/config";
+import events, { SendEvent } from "~/events/events";
 
 // Send light info
 function sendLightOn(client: mqtt.MqttClient, playerId: number, column: number) {
@@ -23,9 +24,14 @@ export const Mqtt = (): React.JSX.Element => {
         // Subscribe to controllers
         client.subscribe(`${gameTopic}/${player1}/${controller}`);
         client.subscribe(`${gameTopic}/${player2}/${controller}`);
-        
-        // client.subscribe(`${gameTopic}/${light1}`)
-        // client.subscribe(`${gameTopic}/${light2}`)
+
+        events.on(SendEvent.LightPlayer1, (column: number) => {
+          sendLightOn(client, 1, column);
+        }) 
+
+        events.on(SendEvent.LightPlayer2, (column: number) => {
+          sendLightOn(client, 2, column)
+        })
       });
 
       client.on('error', (err) => {
