@@ -4,23 +4,30 @@ import {
     WORLD_WIDTH,
     WORLD_HEIGHT,
     COLUMNS_LIST,
-    SQUARE_LIST,
+    MUSIC_NOTE_LIST,
     COL_GAP,
     NUMBER_OF_COL,
+    MUSIC_NOTE_LABEL,
 } from "../constants/gameConfig";
+import { getScore, SCORE_MAPPING, type ScoreLabel } from "./utils/score";
 
 export class GameEngine {
     private engine: Matter.Engine;
     private render: Matter.Render;
     private runner: Matter.Runner;
-    // Active balls are the balls that are currently in the world and colliding with the floor
-    private activeBalls: Set<Matter.Body> = new Set();
-    // Clicked balls are the balls that are currently colliding with the floor and have been clicked
-    private clickedBalls: Set<Matter.Body> = new Set();
+    // Active music notes are the music notes that are currently in the world and colliding with the good timing box
+    private musicNotesCollidingWithTimingBox: Set<Matter.Body> = new Set();
+    // Pressed music note are the music note that are currently colliding with the floor and have been pressed
+    private pressedMusicNotesCollidingWithTimingBox: Set<Matter.Body> =
+        new Set();
+    private goodTimingBoxPosition: Matter.Vector;
+    private maxValidYPosition: number;
+    private onScoreChange?: (score: number, label: ScoreLabel) => void;
 
     constructor(
         container: HTMLElement,
         canvas: HTMLCanvasElement,
+        onScoreChange?: (score: number, label: ScoreLabel) => void,
         width: number = WORLD_WIDTH,
         height: number = WORLD_HEIGHT,
         backgroundColor: string = COLORS.background
@@ -39,21 +46,27 @@ export class GameEngine {
                 height: height,
                 wireframes: false, // Enable wireframes for debugging
                 background: backgroundColor,
+                showAngleIndicator: true,
+                // showCollisions: true,
+                // showConvexHulls: true,
+                // showBroadphase: true,
             },
         });
-
+        this.goodTimingBoxPosition = { x: 0, y: 0 };
+        this.maxValidYPosition = COL_GAP;
+        this.onScoreChange = onScoreChange;
         this.init();
     }
 
     private init() {
-        this.addLimit();
+        this.addGoodTimingBox();
         this.registerEvents();
         Matter.Runner.run(this.runner, this.engine);
         Matter.Render.run(this.render);
     }
 
-    private addLimit() {
-        const floor = Matter.Bodies.rectangle(
+    private addGoodTimingBox() {
+        const goodTimingBox = Matter.Bodies.rectangle(
             WORLD_WIDTH / 2,
             WORLD_HEIGHT - 50,
             WORLD_WIDTH,
@@ -61,14 +74,15 @@ export class GameEngine {
             {
                 isStatic: true,
                 isSensor: true,
-                label: "floor",
+                label: "goodTimingBox",
                 render: {
-                    fillStyle: "black",
-                    opacity: 0.1,
+                    fillStyle: "white",
+                    opacity: 1,
                 },
             }
         );
-        Matter.World.add(this.engine.world, floor);
+        this.goodTimingBoxPosition = goodTimingBox.position;
+        Matter.World.add(this.engine.world, goodTimingBox);
     }
 
     private registerEvents() {
@@ -79,46 +93,76 @@ export class GameEngine {
             // We need to use forEach because the event.pairs is an array that contains the elements that are colliding
             event.pairs.forEach(({ bodyA, bodyB }) => {
                 // We just have to check if the bodyA or bodyB is the ball because the ball is the only element that can collide with the floor
-                if (bodyA.label === "ball" || bodyB.label === "ball") {
-                    const ball = bodyA.label === "ball" ? bodyA : bodyB;
-                    this.activeBalls.add(ball);
+                if (
+                    bodyA.label === MUSIC_NOTE_LABEL ||
+                    bodyB.label === MUSIC_NOTE_LABEL
+                ) {
+                    const ball =
+                        bodyA.label === MUSIC_NOTE_LABEL ? bodyA : bodyB;
+                    this.musicNotesCollidingWithTimingBox.add(ball);
                 }
             });
         });
 
         Matter.Events.on(this.engine, "collisionEnd", (event) => {
             event.pairs.forEach(({ bodyA, bodyB }) => {
-                if (bodyA.label === "ball" || bodyB.label === "ball") {
-                    const ball = bodyA.label === "ball" ? bodyA : bodyB;
-                    this.activeBalls.delete(ball);
-                    this.clickedBalls.delete(ball);
+                if (
+                    bodyA.label === MUSIC_NOTE_LABEL ||
+                    bodyB.label === MUSIC_NOTE_LABEL
+                ) {
+                    const ball =
+                        bodyA.label === MUSIC_NOTE_LABEL ? bodyA : bodyB;
+                    if (
+                        this.musicNotesCollidingWithTimingBox.has(ball) &&
+                        !this.pressedMusicNotesCollidingWithTimingBox.has(ball)
+                    ) {
+                        const { score, label } = SCORE_MAPPING.miss;
+                        this.updateScore(score, label);
+                        console.log("You missed the note");
+                    }
+                    this.pressedMusicNotesCollidingWithTimingBox.delete(ball);
+                    this.musicNotesCollidingWithTimingBox.delete(ball);
                 }
             });
         });
     }
 
     private handleKeyDown = (event: KeyboardEvent) => {
-        this.activeBalls.forEach((ball) => {
+        this.musicNotesCollidingWithTimingBox.forEach((ball) => {
             if (event.key === ball.plugin.inputValue) {
-                this.clickedBalls.add(ball);
+                this.pressedMusicNotesCollidingWithTimingBox.add(ball);
+                const yPositionFromGoodLimit =
+                    this.getYDistanceBetweenTwoBodiesPosition(
+                        ball.position,
+                        this.goodTimingBoxPosition
+                    );
+                const { score, label } = getScore(
+                    yPositionFromGoodLimit,
+                    this.maxValidYPosition
+                );
+                this.updateScore(score, label);
+                console.log(label);
                 Matter.World.remove(this.engine.world, ball);
-                console.log(`Ball with input "${event.key}" removed`);
             }
         });
     };
 
-    public spawnBall(fallSpeed: number = 0.05) {
-        const columnIndex = Math.floor(Math.random() * NUMBER_OF_COL);
-        const { input, color } = SQUARE_LIST[columnIndex];
+    private updateScore(score: number, label: ScoreLabel) {
+        this.onScoreChange?.(score, label);
+    }
 
-        const newBall = Matter.Bodies.rectangle(
+    public spawnMusicNote(fallSpeed: number = 0.05) {
+        const columnIndex = Math.floor(Math.random() * NUMBER_OF_COL);
+        const { input, color } = MUSIC_NOTE_LIST[columnIndex];
+
+        const newMusicNote = Matter.Bodies.rectangle(
             COLUMNS_LIST[columnIndex],
-            0,
+            -50,
             COL_GAP,
             COL_GAP,
             {
                 frictionAir: fallSpeed,
-                label: "ball",
+                label: MUSIC_NOTE_LABEL,
                 isSensor: true,
                 render: {
                     fillStyle: color,
@@ -126,8 +170,15 @@ export class GameEngine {
             }
         );
 
-        newBall.plugin = { inputValue: input };
-        Matter.World.add(this.engine.world, newBall);
+        newMusicNote.plugin = { inputValue: input };
+        Matter.World.add(this.engine.world, newMusicNote);
+    }
+
+    public getYDistanceBetweenTwoBodiesPosition(
+        bodyAPosition: Matter.Vector,
+        bodyBPosition: Matter.Vector
+    ) {
+        return Math.abs(bodyAPosition.y - bodyBPosition.y);
     }
 
     public destroy() {

@@ -11,7 +11,11 @@ export const COLUMNS_LIST = Array.from(
     (_, i) => COL_GAP / 2 + i * COL_GAP
 );
 
-export const SQUARE_LIST = [
+export const GOOD_TIMING_BOX_LABEL = "goodTimingBox";
+export const PERFECT_TIMING_BOX_LABEL = "perfectTimingBox";
+export const MUSIC_NOTE_LABEL = "musicNote";
+
+export const MUSIC_NOTE_LIST = [
     { column: 0, input: "a", color: COLORS.red },
     { column: 1, input: "z", color: COLORS.green },
     { column: 2, input: "e", color: COLORS.blue },
