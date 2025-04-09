@@ -31,6 +31,8 @@ export class GameEngine {
     private onScoreChange?: (score: number, label: ScoreLabel) => void;
     private playerId: PLAYERS;
 
+    private constantFallSpeed: number = 5;
+
     constructor(
         container: HTMLElement,
         canvas: HTMLCanvasElement,
@@ -43,6 +45,7 @@ export class GameEngine {
     ) {
         // The engine is used to create the physics world
         this.engine = Matter.Engine.create();
+        this.engine.gravity.y = 0;
         // The runner is used to run the engine
         this.runner = Matter.Runner.create();
         // The render is used to create the canvas
@@ -67,6 +70,17 @@ export class GameEngine {
     private init() {
         this.addGoodTimingBox();
         this.registerEvents();
+
+        Matter.Events.on(this.engine, "beforeUpdate", () => {
+            this.engine.world.bodies.forEach((body) => {
+                if (body.label === MUSIC_NOTE_LABEL) {
+                    Matter.Body.setVelocity(body, {
+                        x: 0,
+                        y: this.constantFallSpeed,
+                    });
+                }
+            });
+        });
         Matter.Runner.run(this.runner, this.engine);
         Matter.Render.run(this.render);
     }
@@ -263,11 +277,14 @@ export class GameEngine {
             COL_GAP,
             COL_GAP,
             {
-                frictionAir: fallSpeed,
                 label: MUSIC_NOTE_LABEL,
                 isSensor: true,
                 render: {
                     fillStyle: color,
+                },
+                velocity: {
+                    x: 0,
+                    y: 0.5,
                 },
             }
         );
