@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { GameEngine } from "../matter/GameEngine";
 import { SCORE_COLOR_MAPPING, type ScoreLabel } from "~/matter/utils/score";
+import { GameEngine } from "../matter/GameEngine";
 
 interface GameCanvasProps {
+    playerId: number;
     borderColor?: string;
 }
 
-export default function GameCanvas({ borderColor }: GameCanvasProps) {
+export default function GameCanvas({ playerId, borderColor }: GameCanvasProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<GameEngine | null>(null);
@@ -28,6 +29,7 @@ export default function GameCanvas({ borderColor }: GameCanvasProps) {
         engineRef.current = new GameEngine(
             wrapperRef.current,
             canvasRef.current,
+            playerId,
             noteSound,
             onScoreChange
         );

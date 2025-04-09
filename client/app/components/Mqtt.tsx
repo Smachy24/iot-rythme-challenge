@@ -1,7 +1,9 @@
+import console from "console";
 import mqtt from "mqtt";
 import { useEffect, useState } from "react";
 import { controller, gameTopic, light, path, player1, player2, port, url } from "~/config/config";
-import events, { SendEvent } from "~/events/events";
+import { PLAYERS } from "~/constants/gameConfig";
+import events, { ReceiveEvent, SendEvent } from "~/events/events";
 
 // Send light info
 function sendLightOn(client: mqtt.MqttClient, playerId: number, column: number) {
@@ -17,7 +19,7 @@ export const Mqtt = (): React.JSX.Element => {
 
   useEffect(() => {
     if (client) {
-      console.log(client);
+      // console.log(client);
       client.on('connect', () => {
         setConnectStatus('Connected');
 
@@ -35,7 +37,7 @@ export const Mqtt = (): React.JSX.Element => {
       });
 
       client.on('error', (err) => {
-        console.error('Connection error: ', err);
+        // console.error('Connection error: ', err);
         client.end();
       });
       client.on('reconnect', () => {
@@ -43,14 +45,16 @@ export const Mqtt = (): React.JSX.Element => {
       });
 
       client.on('message', (topic, message) => {
-        const noGameTopic = topic.slice(`${gameTopic}/`.length);
-
         // Get column
-        const buttonId = message.toString().slice("Button ".length);
-        const player = topic.includes(`${gameTopic}/${player1}`) ? 1 : 2;
-        
-        console.log(player, buttonId)
-        console.log(topic + " " + message.toString());
+        const buttonId = parseInt(message.toString().slice("Button ".length));
+        const playerId = topic.includes(`${gameTopic}/${player1}`) ? PLAYERS.ONE : PLAYERS.TWO
+
+        switch (playerId) {
+          case PLAYERS.ONE: events.emit(ReceiveEvent.InputPlayer1, buttonId); break;
+          case PLAYERS.TWO: events.emit(ReceiveEvent.InputPlayer2, buttonId); break;
+        }
+
+        // console.log(topic + " " + message.toString());
       });
     } else {
       setConnectStatus('Connecting');
