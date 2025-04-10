@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import MusicTrackSelector from "./MusicTrackSelector";
+import CountdownDisplay from "./CountdownDisplay";
+import FinalScoreDisplay from "./FinalScoreDisplay";
+import GamePlayArea from "./GamePlayArea";
 import { musicTracks } from "~/data/musicTrack";
-import { COLORS } from "~/theme/colors";
-import GameCanvas from "./GameCanvas";
 import { usePlayerManager } from "~/matter/hooks/usePlayerManager";
 import type { IPlayer } from "~/matter/PlayerManager";
-import { PLAYERS_COLORS } from "~/constants/gameConfig";
-
-// Todo: add dynamically player canvas, and maybe add a text when there is no players ?
 
 export default function GameBoard() {
   const [selectedTrack, setSelectedTrack] = useState(musicTracks[0]);
@@ -16,7 +15,8 @@ export default function GameBoard() {
   const [gameOver, setGameOver] = useState(false);
   const [gameInstanceId, setGameInstanceId] = useState(0);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
-  const { players, manager } = usePlayerManager();
+
+  const { players, playerManager } = usePlayerManager();
 
   const startGame = () => {
     const music = new Audio(selectedTrack.audioSrc);
@@ -51,7 +51,7 @@ export default function GameBoard() {
     setShouldStart(false);
     setGameOver(false);
     setCountdown(null);
-    manager.resetScores();
+    playerManager.resetScores();
     setGameInstanceId((id) => id + 1);
   };
 
@@ -72,74 +72,41 @@ export default function GameBoard() {
       <h1 className="text-4xl">Rythme Challenge</h1>
 
       {!gameStarted && (
-        <div className="flex flex-col items-center gap-2">
-          <h2 className="text-white">Select Music Track</h2>
-          <select
-            className="text-black p-1"
-            onChange={(e) => {
-              const track = musicTracks.find((m) => m.name === e.target.value);
-              if (track) setSelectedTrack(track);
-            }}
-            value={selectedTrack.name}
-          >
-            {musicTracks.map((track) => (
-              <option key={track.name} value={track.name}>
-                {track.name} (BPM: {track.bpm})
-              </option>
-            ))}
-          </select>
-
-          {players.length !== 0 && selectedTrack !== null && (
+        <>
+          <MusicTrackSelector
+            selectedTrack={selectedTrack}
+            setSelectedTrack={setSelectedTrack}
+            startGame={startGame}
+            players={players}
+          />
+          {players.length !== 0 && (
             <button
               onClick={startGame}
-              className=" px-4 py-1 bg-pink-500 text-white"
+              className="px-4 py-1 bg-pink-500 text-white"
             >
               Start Game
             </button>
           )}
-        </div>
+        </>
       )}
 
-      {countdown !== null && (
-        <div className="text-4xl font-bold text-white animate-pulse">
-          {countdown === 1 ? "GO!" : countdown}
-        </div>
-      )}
+      {countdown !== null && <CountdownDisplay countdown={countdown} />}
 
       {gameOver && (
-        <div className="mt-6 text-center text-white">
-          <h2 className="text-2xl mb-2">Final Scores</h2>
-
-          {players.map((player) => (
-            <div key={player.mac} className="text-xl">
-              {player.mac}: {player.score}
-            </div>
-          ))}
-          <h2 className="text-2xl mt-4">Winner: </h2>
-          {players.length > 0 && (
-            <div className="text-3xl font-bold">{getWinnerPlayer().mac}</div>
-          )}
-
-          <button
-            className="mt-4 px-4 py-2 bg-pink-500 text-white rounded"
-            onClick={resetGame}
-          >
-            Play Again
-          </button>
-        </div>
+        <FinalScoreDisplay
+          players={players}
+          getWinnerPlayer={getWinnerPlayer}
+          resetGame={resetGame}
+        />
       )}
-      <div className="flex gap-32">
-        {players.map((player) => (
-          <GameCanvas
-            key={`player-${player.mac}-${gameInstanceId}`}
-            player={player}
-            playerManager={manager}
-            borderColor={PLAYERS_COLORS[player.keybindId]}
-            selectedTrack={selectedTrack}
-            shouldStart={shouldStart}
-          />
-        ))}
-      </div>
+
+      <GamePlayArea
+        players={players}
+        playerManager={playerManager}
+        selectedTrack={selectedTrack}
+        shouldStart={shouldStart}
+        gameInstanceId={gameInstanceId}
+      />
     </div>
   );
 }

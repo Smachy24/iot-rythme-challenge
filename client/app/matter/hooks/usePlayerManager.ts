@@ -19,6 +19,6 @@ export function usePlayerManager() {
 
   return {
     players,
-    manager: playerManagerInstance,
+    playerManager: playerManagerInstance,
   };
 }
