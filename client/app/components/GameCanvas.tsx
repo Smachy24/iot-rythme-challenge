@@ -3,11 +3,11 @@ import { SCORE_COLOR_MAPPING, type ScoreLabel } from "~/matter/utils/score";
 import { GameEngine } from "../matter/GameEngine";
 
 interface GameCanvasProps {
-    playerId: number;
+    playerMac: string;
     borderColor?: string;
 }
 
-export default function GameCanvas({ playerId, borderColor }: GameCanvasProps) {
+export default function GameCanvas({ playerMac, borderColor }: GameCanvasProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<GameEngine | null>(null);
@@ -29,7 +29,7 @@ export default function GameCanvas({ playerId, borderColor }: GameCanvasProps) {
         engineRef.current = new GameEngine(
             wrapperRef.current,
             canvasRef.current,
-            playerId,
+            playerMac,
             noteSound,
             onScoreChange
         );

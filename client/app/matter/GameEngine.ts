@@ -6,12 +6,12 @@ import {
     MUSIC_NOTE_COLORS,
     MUSIC_NOTE_LABEL,
     NUMBER_OF_COL,
-    PLAYERS,
     PLAYERS_KEYBIND,
     WORLD_HEIGHT,
     WORLD_WIDTH
 } from "../constants/gameConfig";
 import { COLORS } from "../theme/colors";
+import { playerManager } from "./PlayerManager";
 import { getScore, SCORE_MAPPING, type ScoreLabel } from "./utils/score";
 
 export class GameEngine {
@@ -27,12 +27,12 @@ export class GameEngine {
     private goodTimingBoxPosition: Matter.Vector;
     private maxValidYPosition: number;
     private onScoreChange?: (score: number, label: ScoreLabel) => void;
-    private playerId: PLAYERS;
+    private playerMac: string;
 
     constructor(
         container: HTMLElement,
         canvas: HTMLCanvasElement,
-        playerId: PLAYERS,
+        playerMac: string,
         noteSound: HTMLAudioElement,
         onScoreChange?: (score: number, label: ScoreLabel) => void,
         width: number = WORLD_WIDTH,
@@ -61,7 +61,7 @@ export class GameEngine {
         });
         this.goodTimingBoxPosition = { x: 0, y: 0 };
         this.maxValidYPosition = COL_GAP;
-        this.playerId = playerId;
+        this.playerMac = playerMac;
         this.noteSound = noteSound;
         this.onScoreChange = onScoreChange;
         this.init();
@@ -97,14 +97,8 @@ export class GameEngine {
     private registerEvents() {
         window.addEventListener("keydown", this.handleKeyDown);
 
-        events.removeListener(ReceiveEvent.InputPlayer1);
-        events.removeListener(ReceiveEvent.InputPlayer2)
-
-        // Receive inputs from broker, separeted for player 1 & 2
-        switch (this.playerId) {
-          case PLAYERS.ONE: events.on(ReceiveEvent.InputPlayer1, this.handleInput); break;
-          case PLAYERS.TWO: events.on(ReceiveEvent.InputPlayer2, this.handleInput); break;
-        }
+        // Receive inputs from broker, checks if it's correct mac and handles input
+        events.on(ReceiveEvent.Input, (mac, column) => mac == this.playerMac && this.handleInput(column));
 
         // Handle collision events
         Matter.Events.on(this.engine, "collisionStart", (event) => {
@@ -147,7 +141,15 @@ export class GameEngine {
     }
 
     private handleKeyDown = (event: KeyboardEvent) => {
-        const keybinds = PLAYERS_KEYBIND[this.playerId];
+        const player = playerManager.findByMac(this.playerMac);
+        if (player == undefined) return;
+
+        const keybinds = PLAYERS_KEYBIND[player.keybindId];
+
+        if (keybinds == undefined) {
+            console.log(`player ${player.mac} with keybind id of ${player.keybindId} has no keybinds set`);
+            return;
+        }
         
         const foundKeybind = keybinds.find(k => k.key == event.key);
 
