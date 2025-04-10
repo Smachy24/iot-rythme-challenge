@@ -232,33 +232,49 @@ export class GameEngine {
    * in the correct column
    */
   private handleInput = (column: number) => {
-    if (this.musicNotesCollidingWithTimingBox.size === 0) {
-      const { score, label } = SCORE_MAPPING.too_early;
-      this.updateScore(score, label);
-      return;
-    }
+    // Get the music notes that are colliding with the good timing box
+    const matchingNotes = Array.from(
+      this.musicNotesCollidingWithTimingBox
+    ).filter((musicNote) => musicNote.plugin?.column === column);
 
-    this.musicNotesCollidingWithTimingBox.forEach((musicNote) => {
-      if (column === musicNote.plugin.column) {
-        this.pressedMusicNotesCollidingWithTimingBox.add(musicNote);
-        const yPositionFromGoodLimit =
-          this.getYDistanceBetweenTwoBodiesPosition(
-            musicNote.position,
-            this.goodTimingBoxPosition
-          );
-        const { score, label } = getScore(
-          yPositionFromGoodLimit,
-          this.maxValidYPosition
-        );
+    if (matchingNotes.length === 0) {
+      if (this.musicNotesCollidingWithTimingBox.size === 0) {
+        const { score, label } = SCORE_MAPPING.too_early;
         this.updateScore(score, label);
-        this.noteSound.play();
-        console.log(label);
-        Matter.World.remove(this.engine.world, musicNote);
       } else {
         const { score, label } = SCORE_MAPPING.wrong_note;
         this.updateScore(score, label);
       }
-    });
+      return;
+    }
+
+    let noteToRemove = matchingNotes[0];
+    let minDistance = Math.abs(
+      noteToRemove.position.y - this.goodTimingBoxPosition.y
+    );
+    for (const note of matchingNotes) {
+      const distance = Math.abs(note.position.y - this.goodTimingBoxPosition.y);
+      if (distance < minDistance) {
+        minDistance = distance;
+        noteToRemove = note;
+      }
+    }
+
+    this.pressedMusicNotesCollidingWithTimingBox.add(noteToRemove);
+    const yPositionFromGoodLimit = this.getYDistanceBetweenTwoBodiesPosition(
+      noteToRemove.position,
+      this.goodTimingBoxPosition
+    );
+    const { score, label } = getScore(
+      yPositionFromGoodLimit,
+      this.maxValidYPosition
+    );
+    this.updateScore(score, label);
+    this.noteSound.play();
+    console.log(label);
+
+    Matter.World.remove(this.engine.world, noteToRemove);
+    this.musicNotesCollidingWithTimingBox.delete(noteToRemove);
   };
 
   /**
