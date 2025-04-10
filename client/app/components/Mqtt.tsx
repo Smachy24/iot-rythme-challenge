@@ -1,21 +1,8 @@
 import mqtt from "mqtt";
 import { useEffect, useState } from "react";
+import { controllerLed } from "~/communication/leds";
 import { controller, game, getPlayers, getPlayersPayload, light, path, players, port, url } from "~/config/config";
 import events, { ReceiveEvent, SendEvent } from "~/events/events";
-
-// Send light info
-function updateLights(client: mqtt.MqttClient, playerMac: string, column: number) {
-  const lightArray = new Array(4).fill(false);
-
-  if (0 <= column && column <= 3) {
-    lightArray[column] = true;
-  } 
-
-  const topic = `${game}/${playerMac}/${light}`;
-  const data = JSON.stringify(lightArray);
-
-  client.publish(topic, data , resp => events.emit("log", "cb", resp));
-}
 
 const playerTopics = `${game}/${players}`;
 const controllerTopic = (mac: string) => `${game}/${mac}/${controller}`
@@ -39,9 +26,31 @@ export const Mqtt = (): React.JSX.Element => {
         // Subscription to get controllers
         client.subscribe(playerTopics);
 
-        events.on(SendEvent.Light, (playerMac: string, column: number) => {
-          events.emit("log", "before light", playerMac, column)
-          updateLights(client, playerMac, column);
+        events.on(SendEvent.ActivateLight, (playerMac: string, column: number) => {
+
+          const lightArray = controllerLed.GetActivateArray(playerMac, column);
+          const topic = `${game}/${playerMac}/${light}`;
+          const data = JSON.stringify(lightArray);
+        
+          client.publish(topic, data , resp => events.emit("log", "cb", resp));
+        });
+
+        events.on(SendEvent.DesactivateLight, (playerMac: string, column: number) => {
+
+          const lightArray = controllerLed.GetDesactivateArray(playerMac, column);
+          const topic = `${game}/${playerMac}/${light}`;
+          const data = JSON.stringify(lightArray);
+        
+          client.publish(topic, data , resp => events.emit("log", "cb", resp));
+        })
+
+        events.on(SendEvent.ResetLights, (playerMac: string) => {
+
+          const lightArray = controllerLed.GetResetLedActivationArray(playerMac);
+          const topic = `${game}/${playerMac}/${light}`;
+          const data = JSON.stringify(lightArray);
+        
+          client.publish(topic, data , resp => events.emit("log", "cb", resp));
         })
       });
 
@@ -67,13 +76,15 @@ export const Mqtt = (): React.JSX.Element => {
           const addedControllers = newControllersMac.filter( mac => !controllersMac.includes(mac) )
           const removedControllers = controllersMac.filter( mac => !newControllersMac.includes(mac))
           
-          // Emit added mac adresses (player connect)
-          addedControllers.forEach( mac => events.emit(ReceiveEvent.Connect, mac) );
+          controllersMac = newControllersMac;
 
-          const i = addedControllers.findIndex(m => m.endsWith("c1"));
-          if (i !== -1) {
-            updateLights(client, addedControllers[i], 3);
-          }
+          // Emit added mac adresses (player connect)
+          addedControllers.forEach( mac => {
+            events.emit(ReceiveEvent.Connect, mac);
+            // Send light indication to know which controller belongs to what player
+            const playerIndex = controllersMac.indexOf(mac)
+            events.emit(SendEvent.ActivateLight, mac, playerIndex);
+          });
          
           // Emit removed mac adresses (player disconnect)
           removedControllers.forEach( mac => events.emit(ReceiveEvent.Disconnect, mac) );
@@ -84,7 +95,6 @@ export const Mqtt = (): React.JSX.Element => {
           // Subscribe to added controllers
           addedControllers.forEach(mac => client.subscribe(controllerTopic(mac)));
 
-          controllersMac = newControllersMac;
           
           return;
         }
