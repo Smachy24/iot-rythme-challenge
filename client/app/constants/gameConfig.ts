@@ -24,25 +24,20 @@ export const MUSIC_NOTE_COLORS = [
     { column: 3, color: COLORS.yellow },
 ]
 
-export enum PLAYERS {
-    ONE = 1,
-    TWO = 2
-}
-
 interface IKeybind {
     key: string
     column: number
 }
 
 // Links a key to a column
-export const PLAYERS_KEYBIND: Record<PLAYERS, IKeybind[]>  = {
-    [PLAYERS.ONE]: [
+export const PLAYERS_KEYBIND: Record<number, IKeybind[]>  = {
+    [0]: [
         { key: "a", column: 0 },
         { key: "z", column: 1 },
         { key: "e", column: 2 },
         { key: "r", column: 3 },
     ], 
-    [PLAYERS.TWO]: [
+    [1]: [
         { key: "u", column: 0 },
         { key: "i", column: 1 },
         { key: "o", column: 2 },
