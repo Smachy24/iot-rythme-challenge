@@ -4,7 +4,7 @@ export class PlayerModel {
   private _destinationController64: string;
   private _destinationController16: string;
   private _controllerNodeIdentifier: string
-  private _lights: AT_COMMAND[];
+  private _lights: [AT_COMMAND, AT_COMMAND, AT_COMMAND, AT_COMMAND];
   public lastRequestDate: number;
 
 
@@ -12,7 +12,7 @@ export class PlayerModel {
     this._destinationController64 = destinationController64;
     this._destinationController16 = destinationController16;
     this._controllerNodeIdentifier = controllerNodeIdentifier;
-    this._lights = [AT_COMMAND.D4, AT_COMMAND.D5, AT_COMMAND.D6, AT_COMMAND.D7];
+    this._lights = [AT_COMMAND.D4, AT_COMMAND.D5, AT_COMMAND.D7, AT_COMMAND.D9];
     this.lastRequestDate = Date.now();
 
   }
@@ -41,11 +41,11 @@ export class PlayerModel {
     this._controllerNodeIdentifier = value;
   }
 
-  get lights(): AT_COMMAND[] {
+  get lights(): [AT_COMMAND, AT_COMMAND, AT_COMMAND, AT_COMMAND] {
     return this._lights;
   }
 
-  set lights(value: AT_COMMAND[]) {
+  set lights(value: [AT_COMMAND, AT_COMMAND, AT_COMMAND, AT_COMMAND]) {
     this._lights = value;
   }
 
