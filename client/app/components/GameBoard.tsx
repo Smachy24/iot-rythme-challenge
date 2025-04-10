@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { PLAYERS } from "~/constants/gameConfig";
+import { musicTracks } from "~/data/musicTrack";
 import { COLORS } from "~/theme/colors";
 import GameCanvas from "./GameCanvas";
-import { musicTracks } from "~/data/musicTrack";
+
+// Todo: add dynamically player canvas, and maybe add a text when there is no players ?
 
 export default function GameBoard() {
     const [selectedTrack, setSelectedTrack] = useState(musicTracks[0]);
@@ -10,12 +11,7 @@ export default function GameBoard() {
     const [countdown, setCountdown] = useState<number | null>(null);
     const [shouldStart, setShouldStart] = useState(false);
     const [gameOver, setGameOver] = useState(false);
-    const [playerScores, setPlayerScores] = useState<{ [key: number]: number }>(
-        {
-            1: 0,
-            2: 0,
-        }
-    );
+    // const [playerScores, setPlayerScores] = useState<{ [key: string]: number }>();
     const [gameInstanceId, setGameInstanceId] = useState(0);
     const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
@@ -47,11 +43,11 @@ export default function GameBoard() {
         }, 1000);
     };
 
-    const handleFinalScore = (playerId: number) => (score: number) => {
-        setPlayerScores((prev) => ({
-            ...prev,
-            [playerId]: score,
-        }));
+    const handleFinalScore = (playerMac: string) => (score: number) => {
+        // setPlayerScores((prev) => ({
+        //     ...prev,
+        //     [playerMac]: score,
+        // }));
     };
 
     const resetGame = () => {
@@ -59,7 +55,7 @@ export default function GameBoard() {
         setShouldStart(false);
         setGameOver(false);
         setCountdown(null);
-        setPlayerScores({ 1: 0, 2: 0 });
+        // setPlayerScores({ 1: 0, 2: 0 });
         setGameInstanceId((id) => id + 1);
     };
 
@@ -111,7 +107,10 @@ export default function GameBoard() {
             {gameOver && (
                 <div className="mt-6 text-center text-white">
                     <h2 className="text-2xl mb-2">Final Scores</h2>
-                    <p>Player 1: {playerScores[1]}</p>
+                    {
+                    /*
+
+                        <p>Player 1: {playerScores[1]}</p>
                     <p>Player 2: {playerScores[2]}</p>
 
                     <h2 className="text-3xl mt-4 font-bold">
@@ -121,6 +120,8 @@ export default function GameBoard() {
                             ? "Player 2 wins!"
                             : "Draw!"}
                     </h2>
+                    */
+                    }
                     <button
                         className="mt-4 px-4 py-2 bg-pink-500 text-white rounded"
                         onClick={resetGame}
@@ -133,19 +134,23 @@ export default function GameBoard() {
             <div className="flex gap-32">
                 <GameCanvas
                     key={`player-1-${gameInstanceId}`}
-                    playerId={PLAYERS.ONE}
+                    playerMac={"0013a20041582fc1"}
                     borderColor={COLORS.borderColorPink}
                     selectedTrack={selectedTrack}
                     shouldStart={shouldStart}
+                    /*
                     onFinalScore={handleFinalScore(PLAYERS.ONE)}
+                    */
                 />
                 <GameCanvas
                     key={`player-2-${gameInstanceId}`}
-                    playerId={PLAYERS.TWO}
+                    playerMac={"bee"}
                     borderColor={COLORS.borderColorBlue}
                     selectedTrack={selectedTrack}
                     shouldStart={shouldStart}
+                    /*
                     onFinalScore={handleFinalScore(PLAYERS.TWO)}
+                    */
                 />
             </div>
         </div>

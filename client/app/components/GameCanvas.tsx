@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import type { MusicTrack } from "~/data/musicTrack";
 import { SCORE_COLOR_MAPPING, type ScoreLabel } from "~/matter/utils/score";
 import { GameEngine } from "../matter/GameEngine";
-import type { MusicTrack } from "~/data/musicTrack";
 
 interface GameCanvasProps {
-    playerId: number;
+    playerMac: string;
     borderColor?: string;
     selectedTrack: MusicTrack;
     shouldStart: boolean;
@@ -12,7 +12,7 @@ interface GameCanvasProps {
 }
 
 export default function GameCanvas({
-    playerId,
+    playerMac,
     borderColor,
     selectedTrack,
     shouldStart,
@@ -46,7 +46,7 @@ export default function GameCanvas({
         engineRef.current = new GameEngine(
             wrapperRef.current,
             canvasRef.current,
-            playerId,
+            playerMac,
             noteSound,
             onScoreChange
         );

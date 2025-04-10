@@ -1,17 +1,20 @@
 import console from "console";
 import mqtt from "mqtt";
 import { useEffect, useState } from "react";
-import { controller, gameTopic, light, path, player1, player2, port, url } from "~/config/config";
-import { PLAYERS } from "~/constants/gameConfig";
+import { controller, gameTopic, light, path, players, port, url } from "~/config/config";
 import events, { ReceiveEvent, SendEvent } from "~/events/events";
 
 // Send light info
-function sendLightOn(client: mqtt.MqttClient, playerId: number, column: number) {
+function sendLightOn(client: mqtt.MqttClient, playerTopic: string, column: number) {
   const lightArray = new Array(4).fill(false);
   lightArray[column] = true;
-  const playerTopic = playerId == 1 ? player1 : player2;
   client.publish(`${gameTopic}/${playerTopic}/${light}`, JSON.stringify(lightArray), resp => console.log("cb", resp));
 }
+
+const playerTopics = `${gameTopic}/${players}`;
+const controllerTopic = (mac: string) => `${gameTopic}/${mac}/${controller}`;
+
+let controllersMac: string[] = [];
 
 export const Mqtt = (): React.JSX.Element => {
   const [client, setClient] = useState<mqtt.MqttClient>();
@@ -21,18 +24,14 @@ export const Mqtt = (): React.JSX.Element => {
     if (client) {
       // console.log(client);
       client.on('connect', () => {
+        events.emit("log", "conected")
         setConnectStatus('Connected');
 
-        // Subscribe to controllers
-        client.subscribe(`${gameTopic}/${player1}/${controller}`);
-        client.subscribe(`${gameTopic}/${player2}/${controller}`);
+        // Subscription to get controllers
+        client.subscribe(playerTopics);
 
-        events.on(SendEvent.LightPlayer1, (column: number) => {
-          sendLightOn(client, 1, column);
-        }) 
-
-        events.on(SendEvent.LightPlayer2, (column: number) => {
-          sendLightOn(client, 2, column)
+        events.on(SendEvent.Light, (playerMac: string, column: number) => {
+          sendLightOn(client, playerMac, column);
         })
       });
 
@@ -45,20 +44,59 @@ export const Mqtt = (): React.JSX.Element => {
       });
 
       client.on('message', (topic, message) => {
-        // Get column
-        const buttonId = parseInt(message.toString().slice("Button ".length));
-        const playerId = topic.includes(`${gameTopic}/${player1}`) ? PLAYERS.ONE : PLAYERS.TWO
+        events.emit("log",topic, message.toString())
 
-        switch (playerId) {
-          case PLAYERS.ONE: events.emit(ReceiveEvent.InputPlayer1, buttonId); break;
-          case PLAYERS.TWO: events.emit(ReceiveEvent.InputPlayer2, buttonId); break;
+        // Controllers mac (handles player connect and disconnect)
+        if (topic == playerTopics) {
+
+        
+          // Parse json message as array of string
+          const newControllersMac = JSON.parse(message.toString()) as string[];
+
+          // Get added and removed controllers
+          const addedControllers = newControllersMac.filter( mac => !controllersMac.includes(mac) )
+          const removedControllers = controllersMac.filter( mac => !newControllersMac.includes(mac))
+          
+          // Emit added mac adresses (player connect)
+          addedControllers.forEach( mac => events.emit(ReceiveEvent.Connect, mac) );
+         
+          // Emit removed mac adresses (player disconnect)
+          removedControllers.forEach( mac => events.emit(ReceiveEvent.Disconnect, mac) );
+
+          // Unsubscribe to removed controllers
+          removedControllers.forEach(mac => client.unsubscribe(controllerTopic(mac)));
+
+          // Subscribe to added controllers
+          addedControllers.forEach(mac => client.subscribe(controllerTopic(mac)));
+
+          controllersMac = newControllersMac;
+          
+          return;
         }
 
-        // console.log(topic + " " + message.toString());
+        // Check if message comes from a controller
+        const currentControllerMac = controllersMac.find(mac => topic === controllerTopic(mac));
+        if (currentControllerMac === undefined) return;
+
+        const buttonArray: boolean[] = JSON.parse(message.toString()) as boolean[];
+
+        // Get first column in bool
+        const buttonId = buttonArray.findIndex(v => v === true);
+        events.emit("log", buttonId, buttonArray);
+
+        // Emit button of controller
+        events.emitInput(currentControllerMac, buttonId);
       });
     } else {
       setConnectStatus('Connecting');
       setClient(mqtt.connect(url, { port, path }));
+    }
+
+    return () => {
+      if (client === undefined) return;
+      client.end(() => {
+        setConnectStatus('Disconnected');
+      });
     }
   }, [client]);
 
