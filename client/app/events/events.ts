@@ -4,7 +4,9 @@ import EventEmitter from "eventemitter3";
  * Client to server
  */
 export enum SendEvent {
-  Light = "light",
+  ActivateLight = "activate_light",
+  DesactivateLight = "desativate_light",
+  ResetLights = "reset_lights",
 }
 
 /**
@@ -30,7 +32,9 @@ export declare interface RythmEvents {
   on(event: ReceiveEvent.Connect, listener: (addedMac: string) => void): this;
   on(event: ReceiveEvent.Disconnect, listener: (removedMac: string) => void): this;
   on(event: ReceiveEvent.Input, listener: (playerMac: string, column: number) => void): this;
-  on(event: SendEvent.Light, listener: (playerMac: string, column: number) => void): this;
+  on(event: SendEvent.ActivateLight, listener: (playerMac: string, column: number) => void): this;
+  on(event: SendEvent.DesactivateLight, listener: (playerMac: string, column: number) => void): this;
+  on(event: SendEvent.ResetLights, listener: (playerMac: string) => void): this;
   on(event: GameEvent.UpdateScore, listener: (playerMac: string, amount: number)=> void): this;
   on(event: "log", listener: (...args: any[]) => void): this;
 }
@@ -46,7 +50,7 @@ export class RythmEvents extends EventEmitter {
     this.emit(ReceiveEvent.Input, mac, column);
   }
   emitLight(mac: string, column: number): void {
-    this.emit(SendEvent.Light, mac, column);
+    this.emit(SendEvent.ActivateLight, mac, column);
   }
 }
 
