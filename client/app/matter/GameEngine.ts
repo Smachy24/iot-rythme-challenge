@@ -273,9 +273,7 @@ export class GameEngine {
    * Create and add a new music note to the world
    */
   public spawnMusicNote() {
-    const columnIndex = Math.floor(
-      Math.random() * this.musicNotePRNG() * NUMBER_OF_COL
-    );
+    const columnIndex = Math.floor(this.musicNotePRNG() * NUMBER_OF_COL);
     const { color } = MUSIC_NOTE_COLORS[columnIndex];
 
     const newMusicNote = Matter.Bodies.rectangle(
