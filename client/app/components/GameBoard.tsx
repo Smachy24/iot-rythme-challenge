@@ -4,6 +4,7 @@ import { COLORS } from "~/theme/colors";
 import GameCanvas from "./GameCanvas";
 import { usePlayerManager } from "~/matter/hooks/usePlayerManager";
 import type { IPlayer } from "~/matter/PlayerManager";
+import { PLAYERS_COLORS } from "~/constants/gameConfig";
 
 // Todo: add dynamically player canvas, and maybe add a text when there is no players ?
 
@@ -87,12 +88,15 @@ export default function GameBoard() {
               </option>
             ))}
           </select>
-          <button
-            onClick={startGame}
-            className=" px-4 py-1 bg-pink-500 text-white"
-          >
-            Start Game
-          </button>
+
+          {players.length !== 0 && selectedTrack !== null && (
+            <button
+              onClick={startGame}
+              className=" px-4 py-1 bg-pink-500 text-white"
+            >
+              Start Game
+            </button>
+          )}
         </div>
       )}
 
@@ -130,7 +134,7 @@ export default function GameBoard() {
             key={`player-${player.mac}-${gameInstanceId}`}
             player={player}
             playerManager={manager}
-            borderColor={COLORS.borderColorPink}
+            borderColor={PLAYERS_COLORS[player.keybindId]}
             selectedTrack={selectedTrack}
             shouldStart={shouldStart}
           />

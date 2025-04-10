@@ -104,7 +104,7 @@ export class GameEngine {
         label: "goodTimingBox",
         render: {
           fillStyle: "white",
-          opacity: 1,
+          opacity: 0.2,
         },
       }
     );
