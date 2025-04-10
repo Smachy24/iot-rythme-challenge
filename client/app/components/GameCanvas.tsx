@@ -69,6 +69,7 @@ export default function GameCanvas({
 
   return (
     <div className="flex flex-col items-center">
+      <h2 className="text-white text-2xl">P{player.keybindId}</h2>
       <div
         ref={wrapperRef}
         className="border-2"
@@ -76,9 +77,9 @@ export default function GameCanvas({
       >
         <canvas ref={canvasRef} />
       </div>
-      <h1 className="text-white text-2xl mt-2">{score}</h1>
+      <p className="text-white text-2xl mt-2">{score}</p>
       {scoreLabel && (
-        <h1 style={{ color: SCORE_COLOR_MAPPING[scoreLabel] }}>{scoreLabel}</h1>
+        <p style={{ color: SCORE_COLOR_MAPPING[scoreLabel] }}>{scoreLabel}</p>
       )}
     </div>
   );
