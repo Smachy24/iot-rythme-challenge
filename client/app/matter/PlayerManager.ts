@@ -1,4 +1,5 @@
 import events, { GameEvent, ReceiveEvent, RythmEvents } from "~/events/events";
+import { playersMock } from "~/mock/playersMock";
 
 export interface IPlayer {
   mac: string;
@@ -9,8 +10,8 @@ export interface IPlayer {
 type PlayerUpdateCallback = (players: IPlayer[]) => void;
 
 export class PlayerManager {
-  // public players: IPlayer[] = playersMock;
-  public players: IPlayer[] = [];
+  public players: IPlayer[] = playersMock;
+  // public players: IPlayer[] = [];
   private onUpdate?: PlayerUpdateCallback;
 
   constructor(events: RythmEvents, onUpdate?: PlayerUpdateCallback) {
@@ -55,7 +56,7 @@ export class PlayerManager {
 
     setTimeout(() => {
       events.emitLight(mac, -1);
-    })
+    });
   }
   public removePlayer(mac: string) {
     console.log(`player disconnect ${mac}`);
