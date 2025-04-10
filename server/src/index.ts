@@ -51,7 +51,7 @@ function updateLight(atCommand: AT_COMMAND, on: boolean, destination64: string, 
 }
 
 export function sendGamePlayersToTopic() {
-  sendToTopic('game/players', `[${connectedDevices.keys().toArray().toString()}]`);
+  sendToTopic('game/players', `${JSON.stringify(connectedDevices.keys().toArray())}`);
 }
 
 
