@@ -1,18 +1,25 @@
-import console from "console";
 import mqtt from "mqtt";
 import { useEffect, useState } from "react";
-import { controller, gameTopic, light, path, players, port, url } from "~/config/config";
+import { controller, game, getPlayers, getPlayersPayload, light, path, players, port, url } from "~/config/config";
 import events, { ReceiveEvent, SendEvent } from "~/events/events";
 
 // Send light info
-function sendLightOn(client: mqtt.MqttClient, playerTopic: string, column: number) {
+function updateLights(client: mqtt.MqttClient, playerMac: string, column: number) {
   const lightArray = new Array(4).fill(false);
-  lightArray[column] = true;
-  client.publish(`${gameTopic}/${playerTopic}/${light}`, JSON.stringify(lightArray), resp => console.log("cb", resp));
+
+  if (0 <= column && column <= 3) {
+    lightArray[column] = true;
+  } 
+
+  const topic = `${game}/${playerMac}/${light}`;
+  const data = JSON.stringify(lightArray);
+
+  client.publish(topic, data , resp => events.emit("log", "cb", resp));
 }
 
-const playerTopics = `${gameTopic}/${players}`;
-const controllerTopic = (mac: string) => `${gameTopic}/${mac}/${controller}`;
+const playerTopics = `${game}/${players}`;
+const controllerTopic = (mac: string) => `${game}/${mac}/${controller}`
+const topicGetPlayers = `${game}/${getPlayers}`;
 
 let controllersMac: string[] = [];
 
@@ -22,16 +29,19 @@ export const Mqtt = (): React.JSX.Element => {
 
   useEffect(() => {
     if (client) {
-      // console.log(client);
+      // events.emit("log", client);
       client.on('connect', () => {
-        events.emit("log", "conected")
+        events.emit("log", "connected")
         setConnectStatus('Connected');
+
+        client.publish(topicGetPlayers, getPlayersPayload);
 
         // Subscription to get controllers
         client.subscribe(playerTopics);
 
         events.on(SendEvent.Light, (playerMac: string, column: number) => {
-          sendLightOn(client, playerMac, column);
+          events.emit("log", "before light", playerMac, column)
+          updateLights(client, playerMac, column);
         })
       });
 
@@ -44,7 +54,7 @@ export const Mqtt = (): React.JSX.Element => {
       });
 
       client.on('message', (topic, message) => {
-        events.emit("log",topic, message.toString())
+        events.emit("log", topic, message.toString())
 
         // Controllers mac (handles player connect and disconnect)
         if (topic == playerTopics) {
@@ -59,6 +69,11 @@ export const Mqtt = (): React.JSX.Element => {
           
           // Emit added mac adresses (player connect)
           addedControllers.forEach( mac => events.emit(ReceiveEvent.Connect, mac) );
+
+          const i = addedControllers.findIndex(m => m.endsWith("c1"));
+          if (i !== -1) {
+            updateLights(client, addedControllers[i], 3);
+          }
          
           // Emit removed mac adresses (player disconnect)
           removedControllers.forEach( mac => events.emit(ReceiveEvent.Disconnect, mac) );

@@ -1,5 +1,4 @@
 import events, { GameEvent, ReceiveEvent, RythmEvents } from "~/events/events";
-import { playersMock } from "~/mock/playersMock";
 
 export interface IPlayer {
   mac: string;
@@ -51,6 +50,12 @@ export class PlayerManager {
       keybindId: this.players.length,
     });
     this.notify();
+
+    events.emitLight(mac, 3);
+
+    setTimeout(() => {
+      events.emitLight(mac, -1);
+    })
   }
   public removePlayer(mac: string) {
     console.log(`player disconnect ${mac}`);
