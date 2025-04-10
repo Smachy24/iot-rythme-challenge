@@ -1,11 +1,12 @@
 import mqtt from "mqtt";
 import { sendGamePlayersToTopic } from "./index.ts";
 
-const client = mqtt.connect("mqtt://test.mosquitto.org");
+  const client = mqtt.connect("mqtt://broker.emqx.io");
 
 client.on("connect", () => {
   console.log("Connected to MQTT broker");
   sendGamePlayersToTopic();
+  subscribeToTopic("game/get-players");
 });
 
 export function subscribeToTopic(topic: string) {
