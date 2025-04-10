@@ -120,15 +120,19 @@ xbeeParser.on("data", (frame) => {
       player.lastRequestDate = Date.now();
       if(digitalsSamples.DIO0 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, [true, false, false, false].toString());
+        updateLight(AT_COMMAND.D4, false, player.destinationController64, player.destinationController16);
       }
       if(digitalsSamples.DIO1 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, [false, true, false, false].toString());
+        updateLight(AT_COMMAND.D5, false, player.destinationController64, player.destinationController16);
       }
       if(digitalsSamples.DIO2 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, [false, false, true, false].toString());
+        updateLight(AT_COMMAND.D6, false, player.destinationController64, player.destinationController16);
       }
       if(digitalsSamples.DIO3 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, [false, false, false, true].toString());
+        updateLight(AT_COMMAND.D7, false, player.destinationController64, player.destinationController16);
       }
     }
   }
