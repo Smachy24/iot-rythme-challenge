@@ -120,19 +120,19 @@ xbeeParser.on("data", (frame) => {
       player.lastRequestDate = Date.now();
       if(digitalsSamples.DIO0 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([true, false, false, false]));
-        updateLight(AT_COMMAND.D4, false, player.destinationController64, player.destinationController16);
+        updateLight(player.lights[0], false, player.destinationController64, player.destinationController16);
       }
       if(digitalsSamples.DIO1 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([false, true, false, false]));
-        updateLight(AT_COMMAND.D5, false, player.destinationController64, player.destinationController16);
+        updateLight(player.lights[1], false, player.destinationController64, player.destinationController16);
       }
       if(digitalsSamples.DIO2 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([false, false, true, false]));
-        updateLight(AT_COMMAND.D6, false, player.destinationController64, player.destinationController16);
+        updateLight(player.lights[2], false, player.destinationController64, player.destinationController16);
       }
       if(digitalsSamples.DIO3 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([false, false, false, true]));
-        updateLight(AT_COMMAND.D7, false, player.destinationController64, player.destinationController16);
+        updateLight(player.lights[3], false, player.destinationController64, player.destinationController16);
       }
     }
   }
