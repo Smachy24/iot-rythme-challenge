@@ -6,6 +6,8 @@ import GamePlayArea from "./GamePlayArea";
 import { musicTracks } from "~/data/musicTrack";
 import { usePlayerManager } from "~/matter/hooks/usePlayerManager";
 import type { IPlayer } from "~/matter/PlayerManager";
+import { Button } from "./Button";
+import { Title } from "./Title";
 
 export default function GameBoard() {
   const [selectedTrack, setSelectedTrack] = useState(musicTracks[0]);
@@ -68,26 +70,16 @@ export default function GameBoard() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-7 items-center">
-      <h1 className="text-4xl">Rythme Challenge</h1>
+    <div className="flex flex-col gap-14 items-center">
+      <Title>Rythme Challenge</Title>
 
       {!gameStarted && (
-        <>
-          <MusicTrackSelector
-            selectedTrack={selectedTrack}
-            setSelectedTrack={setSelectedTrack}
-            startGame={startGame}
-            players={players}
-          />
-          {players.length !== 0 && (
-            <button
-              onClick={startGame}
-              className="px-4 py-1 bg-pink-500 text-white"
-            >
-              Start Game
-            </button>
-          )}
-        </>
+        <MusicTrackSelector
+          selectedTrack={selectedTrack}
+          setSelectedTrack={setSelectedTrack}
+          startGame={startGame}
+          players={players}
+        />
       )}
 
       {countdown !== null && <CountdownDisplay countdown={countdown} />}
@@ -107,6 +99,10 @@ export default function GameBoard() {
         shouldStart={shouldStart}
         gameInstanceId={gameInstanceId}
       />
+
+      {!gameStarted && players.length !== 0 && (
+        <Button onClick={startGame}>Start Game</Button>
+      )}
     </div>
   );
 }

@@ -1,13 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap");
 @import "tailwindcss";
 
 @theme {
-    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
+  --font-sans: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html,
 body {
-    padding: 32px;
-    background-color: #171320;
+  font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+  padding: 32px;
+  background-color: #171320;
+}
+
+.button {
+  @apply text-white
+           text-4xl
+           uppercase
+           bg-pink-500
+           border-2 border-pink-400
+           cursor-pointer
+           px-8
+              py-2
+           shadow-[0_8px_0_#b03675]
+           transition-all
+           duration-100
+           relative;
+}
+
+.button:active {
+  @apply shadow-[0_2px_0_#b03675] top-[2px];
+}
+
+.title {
+  @apply text-5xl
+           text-white;
 }
