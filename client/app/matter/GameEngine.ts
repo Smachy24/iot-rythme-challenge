@@ -14,6 +14,7 @@ import {
 import { COLORS } from "../theme/colors";
 import { getScore, SCORE_MAPPING, type ScoreLabel } from "./utils/score";
 import type { PlayerManager } from "./PlayerManager";
+import seedrandom from "seedrandom";
 
 export class GameEngine {
   private engine: Matter.Engine;
@@ -30,6 +31,7 @@ export class GameEngine {
   private onScoreChange?: (score: number, label: ScoreLabel) => void;
   private playerMac: string;
   private playerManager: PlayerManager;
+  private musicNotePRNG: seedrandom.PRNG;
   private constantFallSpeed: number = 5;
 
   constructor(
@@ -38,6 +40,7 @@ export class GameEngine {
     playerMac: string,
     playerManager: PlayerManager,
     noteSound: HTMLAudioElement,
+    musicNotePRNG: seedrandom.PRNG,
     onScoreChange?: (score: number, label: ScoreLabel) => void
   ) {
     // The engine is used to create the physics world
@@ -64,6 +67,7 @@ export class GameEngine {
     this.playerManager = playerManager;
     this.noteSound = noteSound;
     this.onScoreChange = onScoreChange;
+    this.musicNotePRNG = musicNotePRNG;
     this.init();
   }
 
@@ -268,8 +272,10 @@ export class GameEngine {
   /**
    * Create and add a new music note to the world
    */
-  public spawnMusicNote(fallSpeed: number = 0.05) {
-    const columnIndex = Math.floor(Math.random() * NUMBER_OF_COL);
+  public spawnMusicNote() {
+    const columnIndex = Math.floor(
+      Math.random() * this.musicNotePRNG() * NUMBER_OF_COL
+    );
     const { color } = MUSIC_NOTE_COLORS[columnIndex];
 
     const newMusicNote = Matter.Bodies.rectangle(

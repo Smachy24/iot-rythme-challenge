@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import type { MusicTrack } from "~/data/musicTrack";
+import { musicTracks, type MusicTrack } from "~/data/musicTrack";
 import { SCORE_COLOR_MAPPING, type ScoreLabel } from "~/matter/utils/score";
 import { GameEngine } from "../matter/GameEngine";
 import type { IPlayer, PlayerManager } from "~/matter/PlayerManager";
+import seedrandom from "seedrandom";
 
 interface GameCanvasProps {
   player: IPlayer;
@@ -44,6 +45,7 @@ export default function GameCanvas({
 
     const noteSound = new Audio("/public/assets/sounds/drum_kick.wav");
     const beatInterval = 60000 / selectedTrack.bpm;
+    const pnrg = seedrandom(selectedTrack.name);
 
     engineRef.current = new GameEngine(
       wrapperRef.current,
@@ -51,6 +53,7 @@ export default function GameCanvas({
       player.mac,
       playerManager,
       noteSound,
+      pnrg,
       onScoreChange
     );
 
