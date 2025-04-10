@@ -1,20 +1,20 @@
 import Matter from "matter-js";
-import events, { ReceiveEvent } from "~/events/events";
+import seedrandom from "seedrandom";
+import events, { ReceiveEvent, SendEvent } from "~/events/events";
 import {
-  COL_GAP,
-  COLUMNS_LIST,
-  GOOD_TIMING_BOX_LABEL,
-  MUSIC_NOTE_COLORS,
-  MUSIC_NOTE_LABEL,
-  NUMBER_OF_COL,
-  PLAYERS_KEYBIND,
-  WORLD_HEIGHT,
-  WORLD_WIDTH,
+    COL_GAP,
+    COLUMNS_LIST,
+    GOOD_TIMING_BOX_LABEL,
+    MUSIC_NOTE_COLORS,
+    MUSIC_NOTE_LABEL,
+    NUMBER_OF_COL,
+    PLAYERS_KEYBIND,
+    WORLD_HEIGHT,
+    WORLD_WIDTH,
 } from "../constants/gameConfig";
 import { COLORS } from "../theme/colors";
-import { getScore, SCORE_MAPPING, type ScoreLabel } from "./utils/score";
 import type { PlayerManager } from "./PlayerManager";
-import seedrandom from "seedrandom";
+import { getScore, SCORE_MAPPING, type ScoreLabel } from "./utils/score";
 
 export class GameEngine {
   private engine: Matter.Engine;
@@ -74,6 +74,7 @@ export class GameEngine {
   private init() {
     this.addGoodTimingBox();
     this.registerEvents();
+    events.emit(SendEvent.ResetLights, this.playerMac);
 
     Matter.Events.on(this.engine, "beforeUpdate", () => {
       this.engine.world.bodies.forEach((body) => {
@@ -251,6 +252,7 @@ export class GameEngine {
           this.maxValidYPosition
         );
         this.updateScore(score, label);
+        events.emit(SendEvent.DesactivateLight, this.playerMac, column);
         this.noteSound.play();
         console.log(label);
         Matter.World.remove(this.engine.world, musicNote);
@@ -275,6 +277,8 @@ export class GameEngine {
   public spawnMusicNote() {
     const columnIndex = Math.floor(this.musicNotePRNG() * NUMBER_OF_COL);
     const { color } = MUSIC_NOTE_COLORS[columnIndex];
+    
+    events.emit(SendEvent.ActivateLight, this.playerMac, columnIndex);
 
     const newMusicNote = Matter.Bodies.rectangle(
       COLUMNS_LIST[columnIndex],
