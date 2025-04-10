@@ -40,11 +40,11 @@ export class PlayerManager {
     if (foundIndex === -1) return;  
     this.players.splice(foundIndex, 1);
   }
-  public updateScore(mac: string, score: number) {
-    console.log(`player score updated ${mac} with ${score}`)
+  public updateScore(mac: string, amount: number) {
+    console.log(`player score updated ${mac} with ${amount}`)
     const player = this.findByMac(mac);
     if (player === undefined) return;
-    player.score = score;
+    player.score += amount;
   }
 }
 
