@@ -9,10 +9,10 @@ import { PlayerModel } from "./models/player.model.ts";
 dotenv.config();
 
 if (!process.env.SERIAL_PORT)
-    throw new Error('Missing SERIAL_PORT environment variable');
+  throw new Error('Missing SERIAL_PORT environment variable');
 
 if (!process.env.SERIAL_BAUDRATE)
-    throw new Error('Missing SERIAL_BAUDRATE environment variable');
+  throw new Error('Missing SERIAL_BAUDRATE environment variable');
 
 const TIMEOUT_MS = 6000;
 
@@ -46,8 +46,17 @@ function updateLight(atCommand: AT_COMMAND, on: boolean, destination64: string, 
     destination64: destination64,
     destination16: destination16,
     command: atCommand,
-    commandParameter: [on ? 0x05 : 0x00],
+    commandParameter: [on ? 0x04 : 0x00],
   });
+}
+
+function createPlayer(deviceId: string, destinationController16: string): PlayerModel {
+  const player = new PlayerModel(deviceId, destinationController16)
+  connectedDevices.set(deviceId, player);
+  subscribeToTopic(`game/${deviceId}/light`)
+  subscribeToTopic(`game/${deviceId}/controller`)
+  sendGamePlayersToTopic()
+  return player
 }
 
 export function sendGamePlayersToTopic() {
@@ -70,13 +79,16 @@ serialPort.on("close", () => {
 
 
 client.on("message", (topic, message) => {
-  const [ game, deviceId, subTopic ] = topic.split("/");
+  const [game, deviceId, subTopic] = topic.split("/");
 
-  if(subTopic === "light" && deviceId) {
-    console.log(message.toString());
+  const messageStr = message.toString();
+  if (topic === "game/get-players" && messageStr === "players") {
+    sendGamePlayersToTopic()
+  }
+  else if (subTopic === "light" && deviceId) {
     const player = connectedDevices.get(deviceId);
-    if(player) {
-      const lightArray: [boolean, boolean, boolean, boolean] = JSON.parse(message.toString());
+    if (player) {
+      const lightArray: [boolean, boolean, boolean, boolean] = JSON.parse(messageStr);
       const lightIndex: number = lightArray.findIndex(value => value)
       const atCommand = player.lights[lightIndex] as AT_COMMAND;
       updateLight(atCommand, true, player.destinationController64, player.destinationController16);
@@ -87,50 +99,43 @@ client.on("message", (topic, message) => {
 
 // Set up XBee API event handlers
 xbeeParser.on("data", (frame) => {
-  if(frame.type === FRAME_TYPE.JOIN_NOTIFICATION_STATUS) {
+  const deviceId: string = frame.remote64.toString('hex');
+  if (!connectedDevices.has(deviceId)) {
+    createPlayer(deviceId, frame.remote16.toString('hex'));
+  }
+  if (frame.type === FRAME_TYPE.JOIN_NOTIFICATION_STATUS) {
     console.log("Join notification status");
   }
-  if(frame.type === FRAME_TYPE.REGISTER_JOINING_DEVICE_STATUS) {
+  if (frame.type === FRAME_TYPE.REGISTER_JOINING_DEVICE_STATUS) {
     console.log("Register joining device status");
   }
-  if(frame.type === FRAME_TYPE.REGISTER_JOINING_DEVICE) {
+  if (frame.type === FRAME_TYPE.REGISTER_JOINING_DEVICE) {
     console.log("Register joining device");
   }
   if (frame.type === FRAME_TYPE.NODE_IDENTIFICATION) {
-    const deviceId: string = frame.sender64.toString('hex');
-    const nodeIdentifier = frame.nodeIdentifier;
-
-    if (!connectedDevices.has(deviceId)) {
-      const player = new PlayerModel(deviceId, frame.sender16.toString('hex'), nodeIdentifier)
-      connectedDevices.set(deviceId, player);
-      subscribeToTopic(`game/${deviceId}/light`)
-      subscribeToTopic(`game/${deviceId}/controller`)
-      sendGamePlayersToTopic()
-    }
     console.log(connectedDevices);
   }
 
-  if(frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
+  if (frame.type === FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX) {
     const deviceId = frame.remote64.toString('hex');
     const digitalsSamples = frame.digitalSamples;
 
-
     const player = connectedDevices.get(deviceId);
-    if(player){
+    if (player) {
       player.lastRequestDate = Date.now();
-      if(digitalsSamples.DIO0 === 1) {
+      if (digitalsSamples.DIO0 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([true, false, false, false]));
         updateLight(player.lights[0], false, player.destinationController64, player.destinationController16);
       }
-      if(digitalsSamples.DIO1 === 1) {
+      if (digitalsSamples.DIO1 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([false, true, false, false]));
         updateLight(player.lights[1], false, player.destinationController64, player.destinationController16);
       }
-      if(digitalsSamples.DIO2 === 1) {
+      if (digitalsSamples.DIO2 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([false, false, true, false]));
         updateLight(player.lights[2], false, player.destinationController64, player.destinationController16);
       }
-      if(digitalsSamples.DIO3 === 1) {
+      if (digitalsSamples.DIO3 === 1) {
         sendToTopic(`game/${player.destinationController64}/controller`, JSON.stringify([false, false, false, true]));
         updateLight(player.lights[3], false, player.destinationController64, player.destinationController16);
       }
