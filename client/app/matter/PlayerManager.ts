@@ -1,4 +1,5 @@
 import events, { GameEvent, ReceiveEvent, RythmEvents } from "~/events/events";
+import { playersMock } from "~/mock/playersMock";
 
 export interface IPlayer {
   mac: string;
@@ -81,7 +82,7 @@ export class PlayerManager {
   }
 
   public getPlayerName(p: IPlayer) {
-    return `Player ${p.playerId+1} - ${p.mac.slice(-3)}`
+    return `Player ${p.playerId + 1} - ${p.mac.slice(-3)}`;
   }
 }
 

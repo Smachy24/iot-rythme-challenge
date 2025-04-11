@@ -1,6 +1,6 @@
 import { COLORS } from "~/theme/colors";
 
-export const WORLD_WIDTH = 500;
+export const WORLD_WIDTH = 400;
 export const WORLD_HEIGHT = 700;
 export const NUMBER_OF_COL = 4;
 

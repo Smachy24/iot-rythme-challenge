@@ -18,7 +18,7 @@ export default function GamePlayArea({
   gameInstanceId,
 }: GamePlayAreaProps) {
   return (
-    <div className="flex gap-32">
+    <div className="flex gap-16">
       {players.map((player) => (
         <GameCanvas
           key={`player-${player.mac}-${gameInstanceId}`}
