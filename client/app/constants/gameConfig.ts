@@ -49,8 +49,8 @@ export const PLAYERS_COLORS: Record<number, string> = {
   [1]: COLORS.blue,
 };
 export const MUSIC_NOTE_LIST = [
-  { column: 0, input: "a", color: COLORS.red },
-  { column: 1, input: "z", color: COLORS.green },
-  { column: 2, input: "e", color: COLORS.blue },
-  { column: 3, input: "r", color: COLORS.yellow },
+  { column: 0, input: "a", color: COLORS.blue },
+  { column: 1, input: "z", color: COLORS.yellow },
+  { column: 2, input: "e", color: COLORS.green },
+  { column: 3, input: "r", color: COLORS.red },
 ];
