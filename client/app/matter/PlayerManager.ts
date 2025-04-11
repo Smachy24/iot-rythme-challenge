@@ -3,7 +3,7 @@ import events, { GameEvent, ReceiveEvent, RythmEvents } from "~/events/events";
 export interface IPlayer {
   mac: string;
   score: number;
-  keybindId: number;
+  playerId: number;
 }
 
 type PlayerUpdateCallback = (players: IPlayer[]) => void;
@@ -47,7 +47,7 @@ export class PlayerManager {
     this.players.push({
       mac,
       score: 0,
-      keybindId: this.players.length,
+      playerId: this.players.length,
     });
     this.notify();
   }
@@ -78,6 +78,10 @@ export class PlayerManager {
       p.score = 0;
     });
     this.notify();
+  }
+
+  public getPlayerName(p: IPlayer) {
+    return `Player ${p.playerId+1} - ${p.mac.slice(-3)}`
   }
 }
 

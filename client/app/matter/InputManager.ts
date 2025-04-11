@@ -18,10 +18,10 @@ export class InputManager {
     );
     if (!player) return;
 
-    const keybinds = PLAYERS_KEYBIND[player.keybindId];
+    const keybinds = PLAYERS_KEYBIND[player.playerId];
     if (!keybinds) {
       console.log(
-        `Player ${player.mac} with keybind id ${player.keybindId} has no keybinds set`
+        `Player ${player.mac} with keybind id ${player.playerId} has no keybinds set`
       );
       return;
     }
