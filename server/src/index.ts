@@ -14,7 +14,7 @@ if (!process.env.SERIAL_PORT)
 if (!process.env.SERIAL_BAUDRATE)
   throw new Error('Missing SERIAL_BAUDRATE environment variable');
 
-const TIMEOUT_MS = 6000;
+const TIMEOUT_MS = 9000;
 
 // Initialize XBee API with API mode 2
 const xbeeParser = new XBeeParser({
@@ -143,14 +143,14 @@ xbeeParser.on("data", (frame) => {
   }
 });
 
-// setInterval(() => {
-//   const now = Date.now();
-//   for (const [deviceId, player] of connectedDevices.entries()) {
-//     if (now - player.lastRequestDate > TIMEOUT_MS) {
-//       console.log(`Device ${deviceId} timed out`);
-//       connectedDevices.delete(deviceId);
-//       sendGamePlayersToTopic()
-//     }
-//   }
-// }, TIMEOUT_MS);
+setInterval(() => {
+  const now = Date.now();
+  for (const [deviceId, player] of connectedDevices.entries()) {
+    if (now - player.lastRequestDate > TIMEOUT_MS) {
+      console.log(`Device ${deviceId} timed out`);
+      connectedDevices.delete(deviceId);
+      sendGamePlayersToTopic()
+    }
+  }
+}, TIMEOUT_MS);
 
