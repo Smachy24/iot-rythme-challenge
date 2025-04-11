@@ -17,10 +17,10 @@ export const MUSIC_NOTE_LABEL = "musicNote";
 
 // Specify column note colors
 export const MUSIC_NOTE_COLORS = [
-  { column: 0, color: COLORS.red },
-  { column: 1, color: COLORS.green },
-  { column: 2, color: COLORS.blue },
-  { column: 3, color: COLORS.yellow },
+  { column: 0, color: COLORS.blue },
+  { column: 1, color: COLORS.yellow },
+  { column: 2, color: COLORS.green },
+  { column: 3, color: COLORS.red },
 ];
 
 interface IKeybind {
