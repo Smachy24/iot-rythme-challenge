@@ -73,6 +73,7 @@ export class SpawnerManager {
     ) {
       const { score, label } = SCORE_MAPPING.miss;
       this.gameEngine.scoreManager.updateScore(score, label);
+      this.addFeedbackClass(label);
       console.log("You missed the note");
     }
     this.pressedMusicNotesCollidingWithTimingBox.delete(note);
@@ -115,8 +116,17 @@ export class SpawnerManager {
     );
     this.gameEngine.scoreManager.updateScore(score, label);
     this.gameEngine.noteSound.play();
+    this.addFeedbackClass(label);
     console.log(label);
     Matter.World.remove(this.engine.world, note);
     this.musicNotesCollidingWithTimingBox.delete(note);
+  }
+
+  private addFeedbackClass(label: ScoreLabel) {
+    const canvasRef = this.gameEngine.getCanvasRef();
+    canvasRef.classList.add(`${label}-feedback`);
+    setTimeout(() => {
+      canvasRef.classList.remove(`${label}-feedback`);
+    }, 200);
   }
 }

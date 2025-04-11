@@ -36,3 +36,123 @@ body {
   @apply text-5xl
            text-white;
 }
+
+@keyframes perfect-feedback {
+  0% {
+    box-shadow: 0 0 0px #facc15;
+    border-color: #fde047;
+  }
+  50% {
+    box-shadow: 0 0 64px #facc15;
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0px #facc15;
+    border-color: #fde047;
+  }
+}
+
+.perfect-feedback {
+  @apply transition-all duration-200;
+  animation: perfect-feedback 0.4s ease-out;
+}
+
+@keyframes good-feedback {
+  0% {
+    box-shadow: 0 0 0px #4ade80;
+    border-color: #86efac;
+  }
+  50% {
+    box-shadow: 0 0 48px #4ade80;
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0px #4ade80;
+    border-color: #86efac;
+  }
+}
+
+.good-feedback {
+  @apply transition-all duration-200;
+  animation: good-feedback 0.4s ease-out;
+}
+
+@keyframes ok-feedback {
+  0% {
+    box-shadow: 0 0 0px #60a5fa;
+    border-color: #93c5fd;
+  }
+  50% {
+    box-shadow: 0 0 32px #60a5fa;
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0px #60a5fa;
+    border-color: #93c5fd;
+  }
+}
+
+.ok-feedback {
+  @apply transition-all duration-200;
+  animation: ok-feedback 0.4s ease-out;
+}
+
+@keyframes miss-feedback {
+  0% {
+    box-shadow: 0 0 0px #dc2626;
+    border-color: #f87171;
+  }
+  50% {
+    box-shadow: 0 0 48px #dc2626;
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0px #dc2626;
+    border-color: #f87171;
+  }
+}
+
+.miss-feedback {
+  @apply transition-all duration-200;
+  animation: miss-feedback 0.4s ease-out;
+}
+
+@keyframes wrong_note-feedback {
+  0% {
+    box-shadow: 0 0 0px #e11d48;
+    border-color: #fb7185;
+  }
+  50% {
+    box-shadow: 0 0 48px #e11d48;
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0px #e11d48;
+    border-color: #fb7185;
+  }
+}
+
+.wrong_note-feedback {
+  @apply transition-all duration-200;
+  animation: wrong_note-feedback 0.4s ease-out;
+}
+
+@keyframes too_early-feedback {
+  0% {
+    box-shadow: 0 0 0px #7c3aed;
+    border-color: #c4b5fd;
+  }
+  50% {
+    box-shadow: 0 0 48px #7c3aed;
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0px #7c3aed;
+    border-color: #c4b5fd;
+  }
+}
+
+.too_early-feedback {
+  @apply transition-all duration-200;
+  animation: too_early-feedback 0.4s ease-out;
+}

@@ -100,6 +100,10 @@ export class GameEngine {
     Matter.Render.run(this.render);
   }
 
+  public getCanvasRef() {
+    return this.render.canvas;
+  }
+
   private addGoodTimingBox() {
     const goodTimingBox = this.createGoodTimingBox();
     this.goodTimingBoxPosition = goodTimingBox.position;
