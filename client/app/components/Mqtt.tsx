@@ -12,7 +12,7 @@ import {
   port,
   url,
 } from "~/config/config";
-import events, { ReceiveEvent, SendEvent } from "~/events/events";
+import events, { SendEvent } from "~/events/events";
 
 const playerTopics = `${game}/${players}`;
 const controllerTopic = (mac: string) => `${game}/${mac}/${controller}`;
@@ -106,21 +106,22 @@ export const Mqtt = (): React.JSX.Element => {
 
           // Emit added mac adresses (player connect)
           addedControllers.forEach((mac) => {
-            events.emit(ReceiveEvent.Connect, mac);
+            events.emitConnect(mac);
             // Send light indication to know which controller belongs to what player
             const playerIndex = controllersMac.indexOf(mac);
-            events.emit(SendEvent.ActivateLight, mac, playerIndex);
+            events.emitLightOn(mac, playerIndex);
           });
 
           // Emit removed mac adresses (player disconnect)
           removedControllers.forEach((mac) =>
-            events.emit(ReceiveEvent.Disconnect, mac)
+            events.emitDisconnect(mac)
           );
 
           // Unsubscribe to removed controllers
-          removedControllers.forEach((mac) =>
-            client.unsubscribe(controllerTopic(mac))
-          );
+          removedControllers.forEach((mac) => {
+            events.emitLightReset(mac);
+            client.unsubscribe(controllerTopic(mac));
+          });
 
           // Subscribe to added controllers
           addedControllers.forEach((mac) =>

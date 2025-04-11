@@ -32,7 +32,7 @@ export class GameEngine {
   public scoreManager: ScoreManager;
 
   public noteSound: HTMLAudioElement;
-  private playerMac: string;
+  public playerMac: string;
   public playerManager: PlayerManager;
   private musicNotePRNG: seedrandom.PRNG;
   private onScoreChange?: (score: number, label: ScoreLabel) => void;
