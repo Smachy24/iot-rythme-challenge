@@ -87,8 +87,10 @@ export class GameEngine {
   }
 
   private init() {
-    events.emit(SendEvent.ResetLights, this.playerMac);
+    events.emitLightReset(this.playerMac);
     this.addGoodTimingBox();
+
+    events.on(ReceiveEvent.Input, (mac, column) => mac === this.playerMac && this.spawnerManager.handleInput(column))
 
     this.inputManager.registerEvents();
     this.collisionManager.registerEvents();
