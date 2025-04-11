@@ -1,5 +1,5 @@
 import Matter from "matter-js";
-import events, { ReceiveEvent } from "~/events/events";
+import events, { ReceiveEvent, SendEvent } from "~/events/events";
 import {
   COL_GAP,
   COLUMNS_LIST,
@@ -87,6 +87,7 @@ export class GameEngine {
   }
 
   private init() {
+    events.emit(SendEvent.ResetLights, this.playerMac);
     this.addGoodTimingBox();
 
     this.inputManager.registerEvents();
