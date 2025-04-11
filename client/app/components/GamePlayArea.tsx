@@ -1,6 +1,6 @@
-import GameCanvas from "./GameCanvas";
 import { PLAYERS_COLORS } from "~/constants/gameConfig";
 import type { IPlayer, PlayerManager } from "~/matter/PlayerManager";
+import GameCanvas from "./GameCanvas";
 
 interface GamePlayAreaProps {
   players: IPlayer[];
@@ -24,7 +24,7 @@ export default function GamePlayArea({
           key={`player-${player.mac}-${gameInstanceId}`}
           player={player}
           playerManager={manager}
-          borderColor={PLAYERS_COLORS[player.keybindId]}
+          borderColor={PLAYERS_COLORS[player.playerId]}
           selectedTrack={selectedTrack}
           shouldStart={shouldStart}
         />

@@ -1,4 +1,5 @@
 import Matter from "matter-js";
+import events from "~/events/events";
 import {
   GOOD_TIMING_BOX_LABEL,
   MUSIC_NOTE_LABEL,
@@ -26,6 +27,7 @@ export class CollisionManager {
       if (this.isMusicNoteAndTimingBoxCollision(bodyA, bodyB)) {
         const musicNote = this.getMusicNoteFromPair(bodyA, bodyB);
         if (musicNote) {
+          events.emitLightOn(this.gameEngine.playerMac, musicNote.plugin.column);
           this.gameEngine.spawnerManager.addCollidingNote(musicNote);
         }
       }
@@ -41,6 +43,7 @@ export class CollisionManager {
         bodyB.label === MUSIC_NOTE_LABEL
       ) {
         const musicNote = bodyA.label === MUSIC_NOTE_LABEL ? bodyA : bodyB;
+        events.emitLightOff(this.gameEngine.playerMac, musicNote.plugin.column);
         this.gameEngine.spawnerManager.processEndCollision(musicNote);
       }
     });

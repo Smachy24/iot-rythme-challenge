@@ -64,8 +64,14 @@ export class RythmEvents extends EventEmitter {
   emitInput(mac: string, column: number): void {
     this.emit(ReceiveEvent.Input, mac, column);
   }
-  emitLight(mac: string, column: number): void {
+  emitLightOn(mac: string, column: number): void {
     this.emit(SendEvent.ActivateLight, mac, column);
+  }
+  emitLightOff(mac: string, column: number): void {
+    this.emit(SendEvent.DesactivateLight, mac, column);
+  }
+  emitLightReset(mac: string): void {
+    this.emit(SendEvent.ResetLights, mac);
   }
 }
 

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { musicTracks, type MusicTrack } from "~/data/musicTrack";
+import seedrandom from "seedrandom";
+import { type MusicTrack } from "~/data/musicTrack";
+import type { IPlayer, PlayerManager } from "~/matter/PlayerManager";
 import { SCORE_COLOR_MAPPING, type ScoreLabel } from "~/matter/utils/score";
 import { GameEngine } from "../matter/GameEngine";
-import type { IPlayer, PlayerManager } from "~/matter/PlayerManager";
-import seedrandom from "seedrandom";
 
 interface GameCanvasProps {
   player: IPlayer;
@@ -43,7 +43,7 @@ export default function GameCanvas({
     }
     if (!canvasRef.current || !wrapperRef.current) return;
 
-    const noteSound = new Audio("/public/assets/sounds/drum_kick.wav");
+    const noteSound = new Audio("/assets/sounds/osu_hit_high.mp3");
     const beatInterval = 60000 / selectedTrack.bpm;
     const pnrg = seedrandom(selectedTrack.name);
 
@@ -69,7 +69,9 @@ export default function GameCanvas({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-white text-2xl">P{player.keybindId}</h2>
+      <h2 className="text-white text-2xl">
+        {playerManager.getPlayerName(player)}
+      </h2>
       <div
         ref={wrapperRef}
         className="border-2 relative"

@@ -1,17 +1,16 @@
 import events, { GameEvent, ReceiveEvent, RythmEvents } from "~/events/events";
-import { playersMock } from "~/mock/playersMock";
 
 export interface IPlayer {
   mac: string;
   score: number;
-  keybindId: number;
+  playerId: number;
 }
 
 type PlayerUpdateCallback = (players: IPlayer[]) => void;
 
 export class PlayerManager {
-  public players: IPlayer[] = playersMock;
-  // public players: IPlayer[] = [];
+  // public players: IPlayer[] = playersMock;
+  public players: IPlayer[] = [];
   private onUpdate?: PlayerUpdateCallback;
 
   constructor(events: RythmEvents, onUpdate?: PlayerUpdateCallback) {
@@ -48,15 +47,9 @@ export class PlayerManager {
     this.players.push({
       mac,
       score: 0,
-      keybindId: this.players.length,
+      playerId: this.players.length,
     });
     this.notify();
-
-    events.emitLight(mac, 3);
-
-    setTimeout(() => {
-      events.emitLight(mac, -1);
-    });
   }
   public removePlayer(mac: string) {
     console.log(`player disconnect ${mac}`);
@@ -85,6 +78,10 @@ export class PlayerManager {
       p.score = 0;
     });
     this.notify();
+  }
+
+  public getPlayerName(p: IPlayer) {
+    return `Player ${p.playerId+1} - ${p.mac.slice(-3)}`
   }
 }
 
