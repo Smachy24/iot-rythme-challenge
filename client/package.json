@@ -11,15 +11,21 @@
   "dependencies": {
     "@react-router/node": "^7.5.0",
     "@react-router/serve": "^7.5.0",
+    "@types/seedrandom": "^3.0.8",
+    "eventemitter3": "^5.0.1",
     "isbot": "^5.1.17",
+    "matter-js": "^0.20.0",
+    "mqtt": "^5.10.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.5.0",
+    "seedrandom": "^3.0.5",
     "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@react-router/dev": "^7.5.0",
     "@tailwindcss/vite": "^4.0.0",
+    "@types/matter-js": "^0.19.8",
     "@types/node": "^20",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",

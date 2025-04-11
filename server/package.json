@@ -1,20 +1,25 @@
 {
-  "name": "zigbee-demo",
-  "version": "0.1.0",
+  "name": "rythme-challenge-server",
+  "module": "src/index.ts",
+  "type": "module",
   "private": true,
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
   "scripts": {
-    "start": "cross-env NODE_ENV=production node src/server"
+    "start": "npx tsx src/index.ts",
+    "compile": "npx tsc",
+    "dev": "nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec npx tsx src/index.ts"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   },
   "dependencies": {
-    "dotenv": "^8.2.0",
-    "firebase-admin": "^9.5.0",
-    "serialport": "^9.2.4",
-    "socket.io": "^2.4.0",
-    "xbee": "^0.0.4",
-    "xbee-api": "^0.6.0",
-    "yarn": "^1.22.22"
-  },
-  "devDependencies": {
-    "cross-env": "^7.0.3"
+    "dotenv": "^16.4.7",
+    "mqtt": "^5.10.4",
+    "serialport": "^13.0.0",
+    "socket.io": "^4.8.1",
+    "ts-xbee-api": "^2.0.2",
+    "xbee": "^0.0.4"
   }
 }
