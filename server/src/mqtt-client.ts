@@ -21,6 +21,7 @@ export function subscribeToTopic(topic: string) {
 }
 
 export function sendToTopic(topic: string, message: string) {
+  console.log(message)
   client.publish(topic, message, (err) => {
     if (err) {
       console.error(`Failed to publish message to topic ${topic}:`, err);

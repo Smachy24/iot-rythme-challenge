@@ -143,13 +143,14 @@ xbeeParser.on("data", (frame) => {
   }
 });
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [deviceId, player] of connectedDevices.entries()) {
-    if (now - player.lastRequestDate > TIMEOUT_MS) {
-      connectedDevices.delete(deviceId);
-      sendGamePlayersToTopic()
-    }
-  }
-}, TIMEOUT_MS);
+// setInterval(() => {
+//   const now = Date.now();
+//   for (const [deviceId, player] of connectedDevices.entries()) {
+//     if (now - player.lastRequestDate > TIMEOUT_MS) {
+//       console.log(`Device ${deviceId} timed out`);
+//       connectedDevices.delete(deviceId);
+//       sendGamePlayersToTopic()
+//     }
+//   }
+// }, TIMEOUT_MS);
 
