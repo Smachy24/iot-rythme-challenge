@@ -34,7 +34,9 @@ export default function GameBoard() {
       if (count === 0) {
         clearInterval(countdownInterval);
         setCountdown(null);
+
         music.play();
+        music.volume = 0.1;
         setShouldStart(true);
         setGameStarted(true);
 
