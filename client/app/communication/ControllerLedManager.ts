@@ -11,8 +11,9 @@ class ControllerLedManager {
   }
 
   // Reset led array
-  public GetResetLedActivationArray(playerMac: string) {
+  public GetResetLedActivationArray(playerMac: string): LedArray {
     this.playerLedsState[playerMac] = [false, false, false, false];
+    return this.playerLedsState[playerMac];
   }
 
   // Activate led array
