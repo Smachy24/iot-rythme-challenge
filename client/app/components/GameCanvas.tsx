@@ -72,15 +72,23 @@ export default function GameCanvas({
       <h2 className="text-white text-2xl">P{player.keybindId}</h2>
       <div
         ref={wrapperRef}
-        className="border-2"
+        className="border-2 relative"
         style={{ borderColor: borderColor }}
       >
         <canvas ref={canvasRef} />
+        {scoreLabel && (
+          <p
+            className={`score-label`}
+            style={{
+              color: SCORE_COLOR_MAPPING[scoreLabel],
+              textShadow: `0 0 10px ${SCORE_COLOR_MAPPING[scoreLabel]}`,
+            }}
+          >
+            {scoreLabel}
+          </p>
+        )}
       </div>
       <p className="text-white text-2xl mt-2">{score}</p>
-      {scoreLabel && (
-        <p style={{ color: SCORE_COLOR_MAPPING[scoreLabel] }}>{scoreLabel}</p>
-      )}
     </div>
   );
 }
