@@ -1,13 +1,14 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
-}
+import { NavLink } from "react-router";
+import { Button } from "~/components/Button";
+import { Title } from "~/components/Title";
 
 export default function Home() {
-  return <Welcome />;
+  return (
+    <div className="flex flex-col gap-12 items-center justify-center ">
+      <Title>Rythme Challenge</Title>
+      <NavLink to="/game">
+        <Button>Insert Coin</Button>
+      </NavLink>
+    </div>
+  );
 }
