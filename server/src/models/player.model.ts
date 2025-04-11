@@ -10,9 +10,8 @@ export class PlayerModel {
   constructor(destinationController64: string, destinationController16: string) {
     this._destinationController64 = destinationController64;
     this._destinationController16 = destinationController16;
-    this._lights = [AT_COMMAND.D4, AT_COMMAND.D5, AT_COMMAND.D7, AT_COMMAND.D9];
+    this._lights = [AT_COMMAND.D4, AT_COMMAND.P2, AT_COMMAND.D7, AT_COMMAND.P1];
     this.lastRequestDate = Date.now();
-
   }
 
   get destinationController64(): string {
